@@ -1,0 +1,39 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.3.61'
+}
+
+group 'com.gilbertojrequena'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'http://dl.bintray.com/jonnyzzz/maven' }
+}
+
+dependencies {
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.228')
+    implementation 'com.amazonaws:aws-java-sdk-sns'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'io.ktor:ktor-server-netty:1.2.6'
+    implementation 'io.ktor:ktor-client-apache:1.2.6'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.4'
+    implementation 'org.jonnyzzz.kotlin.xml.dsl:jdom:0.1.6'
+    implementation 'org.jonnyzzz.kotlin.xml.dsl:api:0.1.6'
+    implementation 'org.jdom:jdom2:2.0.6'
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'io.github.microutils:kotlin-logging:1.7.7'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2'
+    implementation 'org.elasticmq:elasticmq-rest-sqs_2.12:0.15.3'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
