@@ -1,8 +1,6 @@
 package com.gilbertojrequena.memsns.core.actor
 
-import com.gilbertojrequena.memsns.core.SnsHttpClient
-import com.gilbertojrequena.memsns.core.Subscription
-import com.gilbertojrequena.memsns.core.Topic
+import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.dispatcher.HttpMessageDispatcher
 import com.gilbertojrequena.memsns.core.actor.dispatcher.SqsMessageDispatcher
 import com.gilbertojrequena.memsns.core.actor.message.PublishMessage
@@ -19,10 +17,8 @@ fun publishActor(snsOpsActor: SendChannel<SnsOpsMessage>) = GlobalScope.actor<Pu
     with(MessageDispatchManager(snsOpsActor, SnsHttpClient())) {
         for (message in channel) {
             when (message) {
-                is PublishMessage.Publish -> dispatchMessage(
-                    message.subscription,
-                    message.message,
-                    message.messageId
+                is PublishMessage.Publish -> dispatchMessages(
+                    message.publishRequest
                 )
             }
         }
@@ -42,17 +38,24 @@ private class MessageDispatchManager(
         Subscription.Protocol.SQS to SqsMessageDispatcher(snsHttpClient)
     )
 
-    suspend fun dispatchMessage(
-        subscription: Subscription,
-        message: String,
-        messageId: String
+    suspend fun dispatchMessages(
+        publishRequest: PublishRequest
     ) {
-        publishScope.launch {
-            val responseChannel = Channel<Topic?>()
-            snsOpsActor.send(SnsOpsMessage.FindTopicByArn(subscription.topicArn, responseChannel))
-            val topic = responseChannel.receive() ?: throw TODO()
-            val messageDispatcher = dispatcherByProtocol[subscription.protocol] ?: throw TODO()
-            messageDispatcher.publish(topic, subscription, message, messageId)
+        val subsAndToken = getSubscriptions(publishRequest)
+        for (subscription in subsAndToken.subscriptions) {
+            publishScope.launch {
+                val responseChannel = Channel<Topic?>()
+                snsOpsActor.send(SnsOpsMessage.FindTopicByArn(subscription.topicArn, responseChannel))
+                val topic = responseChannel.receive() ?: throw TODO()
+                val messageDispatcher = dispatcherByProtocol[subscription.protocol] ?: throw TODO()
+                messageDispatcher.publish(topic, subscription, publishRequest.message, publishRequest.messageId)
+            }
         }
+    }
+
+    private suspend fun getSubscriptions(publishRequest: PublishRequest): SubscriptionsAndToken {
+        val responseChannel = Channel<SubscriptionsAndToken>()
+        snsOpsActor.send(SnsOpsMessage.FindAllSubscriptionsByTopic(publishRequest.topicArn, null, responseChannel))
+        return responseChannel.receive() //TODO use the pagination
     }
 }

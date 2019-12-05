@@ -1,8 +1,8 @@
 package com.gilbertojrequena.memsns.core.actor.message
 
-import com.gilbertojrequena.memsns.core.Subscription
+import com.gilbertojrequena.memsns.core.PublishRequest
 
-sealed class PublishMessage(val subscription: Subscription, val message: String, val messageId: String) {
-    class Publish(subscription: Subscription, message: String, messageId: String) :
-        PublishMessage(subscription, message, messageId)
+sealed class PublishMessage(val publishRequest: PublishRequest) {
+    class Publish(publishRequest: PublishRequest) :
+        PublishMessage(publishRequest)
 }

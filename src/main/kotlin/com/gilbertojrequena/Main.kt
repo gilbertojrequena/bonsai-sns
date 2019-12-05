@@ -18,7 +18,7 @@ internal fun Application.main() {
     val snsManager = RequestHandler(
         TopicManager(snsOpsActor),
         SubscriptionManager(snsOpsActor),
-        PublicationManager(snsOpsActor, publishActor(snsOpsActor))
+        PublicationManager(publishActor(snsOpsActor))
     )
 
     routing {
