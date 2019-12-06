@@ -11,10 +11,7 @@ import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 class DeleteTopic(private val topicManager: TopicManager) : Action {
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
 
-        val deleted = topicManager.delete(params["TopicArn"] ?: throw TODO())
-        if (!deleted) {
-            throw TODO()
-        }
+        topicManager.delete(params["TopicArn"] ?: throw TODO())
 
         call.respondText {
             ObjectMapper.writeXmlElement(

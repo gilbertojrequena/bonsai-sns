@@ -11,8 +11,7 @@ import kotlinx.coroutines.channels.SendChannel
 class TopicManager(private val snsOpActor: SendChannel<SnsOpsMessage>) {
 
     suspend fun create(topic: Topic): Topic {
-        val responseChannel = Channel<Topic>()
-        snsOpActor.send(
+        return sendToActorAndReceive {
             SnsOpsMessage.SaveTopic(
                 Topic(
                     topic.name,
@@ -21,33 +20,30 @@ class TopicManager(private val snsOpActor: SendChannel<SnsOpsMessage>) {
                     buildArn(topic),
                     topic.attributes,
                     topic.tags
-                ), responseChannel
+                ), it
             )
-        )
-        return responseChannel.receive()
+        }
     }
 
-    suspend fun findAll(fromToken: Token?): TopicsAndToken {
-        val responseChannel = Channel<TopicsAndToken>()
-        snsOpActor.send(SnsOpsMessage.FindAllTopics(fromToken, responseChannel))
-        return responseChannel.receive()
+    suspend fun findAll(fromToken: Token? = null): TopicsAndToken {
+        return sendToActorAndReceive { SnsOpsMessage.FindAllTopics(fromToken, it) }
     }
 
-    suspend fun findByArn(arn: TopicArn): Topic? {
-        val responseChannel = Channel<Topic?>()
-        snsOpActor.send(SnsOpsMessage.FindTopicByArn(arn, responseChannel))
-        return responseChannel.receive() ?: throw TODO("Implement exception for topic not found")
+    suspend fun findByArn(arn: TopicArn): Topic {
+        return sendToActorAndReceive { SnsOpsMessage.FindTopicByArn(arn, it) }
     }
 
     suspend fun exists(arn: TopicArn): Boolean {
-        val responseChannel = Channel<Boolean>()
-        snsOpActor.send(SnsOpsMessage.TopicExists(arn, responseChannel))
-        return responseChannel.receive()
+        return sendToActorAndReceive { SnsOpsMessage.TopicExists(arn, it) }
     }
 
-    suspend fun delete(arn: TopicArn): Boolean {
-        val responseChannel = Channel<Boolean>()
-        snsOpActor.send(SnsOpsMessage.DeleteTopic(arn, responseChannel))
+    suspend fun delete(arn: TopicArn): Topic {
+        return sendToActorAndReceive { SnsOpsMessage.DeleteTopic(arn, it) }
+    }
+
+    private suspend fun <T> sendToActorAndReceive(buildMessage: (Channel<T>) -> SnsOpsMessage): T {
+        val responseChannel = Channel<T>()
+        snsOpActor.send(buildMessage(responseChannel))
         return responseChannel.receive()
     }
 

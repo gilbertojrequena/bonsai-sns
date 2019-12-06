@@ -8,9 +8,9 @@ sealed class SnsOpsMessage {
     class FindAllTopics(val fromToken: Token? = null, val response: SendChannel<TopicsAndToken>) :
         SnsOpsMessage()
 
-    class FindTopicByArn(val arn: TopicArn, val response: SendChannel<Topic?>) : SnsOpsMessage()
+    class FindTopicByArn(val arn: TopicArn, val response: SendChannel<Topic>) : SnsOpsMessage()
     class TopicExists(val arn: TopicArn, val response: SendChannel<Boolean>) : SnsOpsMessage()
-    class DeleteTopic(val arn: TopicArn, val response: SendChannel<Boolean>) : SnsOpsMessage()
+    class DeleteTopic(val arn: TopicArn, val response: SendChannel<Topic>) : SnsOpsMessage()
     class FindAllSubscriptions(val fromToken: Token? = null, val response: SendChannel<SubscriptionsAndToken>) :
         SnsOpsMessage()
 
