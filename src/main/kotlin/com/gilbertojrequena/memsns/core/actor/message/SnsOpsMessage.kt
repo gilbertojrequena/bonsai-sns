@@ -24,5 +24,5 @@ sealed class SnsOpsMessage {
     ) :
         SnsOpsMessage()
 
-    class DeleteSubscription(val arn: SubscriptionArn, val response: SendChannel<Boolean>) : SnsOpsMessage()
+    class DeleteSubscription(val arn: SubscriptionArn, val response: SendChannel<Subscription>) : SnsOpsMessage()
 }

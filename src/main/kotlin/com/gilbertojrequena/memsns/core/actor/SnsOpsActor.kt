@@ -2,8 +2,9 @@ package com.gilbertojrequena.memsns.core.actor
 
 import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
-import com.gilbertojrequena.memsns.core.exception.SubscriptionNotFound
-import com.gilbertojrequena.memsns.core.exception.TopicAlreadyExist
+import com.gilbertojrequena.memsns.core.exception.SubscriptionAlreadyExist
+import com.gilbertojrequena.memsns.core.exception.SubscriptionNotFoundException
+import com.gilbertojrequena.memsns.core.exception.TopicAlreadyExistException
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.SendChannel
@@ -22,14 +23,14 @@ fun snsOpsActor() = GlobalScope.actor<SnsOpsMessage> {
                 is SnsOpsMessage.TopicExists -> message.response.send(topicExists(message.arn))
                 is SnsOpsMessage.DeleteTopic -> sendOrClose(message.response) { deleteTopic(message.arn) }
                 is SnsOpsMessage.FindAllSubscriptions -> message.response.send(findAllSubscriptions(message.fromToken))
-                is SnsOpsMessage.SaveSubscription -> message.response.send(saveSubscription(message.subscription))
-                is SnsOpsMessage.FindAllSubscriptionsByTopic -> message.response.send(
+                is SnsOpsMessage.SaveSubscription -> sendOrClose(message.response) { saveSubscription(message.subscription) }
+                is SnsOpsMessage.FindAllSubscriptionsByTopic -> sendOrClose(message.response) {
                     findAllSubscriptionsByTopicArn(
                         message.topicArn,
                         message.fromToken
                     )
-                )
-                is SnsOpsMessage.DeleteSubscription -> message.response.send(deleteSubscription(message.arn))
+                }
+                is SnsOpsMessage.DeleteSubscription -> sendOrClose(message.response) { deleteSubscription(message.arn) }
             }
         }
     }
@@ -52,7 +53,7 @@ private class Database {
 
     fun saveTopic(topic: Topic): Topic {
         if (topicExists(topic.arn)) {
-            throw TopicAlreadyExist(topic.name)
+            throw TopicAlreadyExistException(topic.name)
         }
         topics[topic.arn] = TopicWithToken(topic, topic.arn.md5())
         return topic
@@ -76,7 +77,7 @@ private class Database {
 
     fun saveSubscription(subscription: Subscription): Subscription {
         if (subscriptionExists(subscription)) {
-            throw SubscriptionNotFound(subscription.arn)
+            throw SubscriptionAlreadyExist(subscription)
         }
         topicSubscriptions[subscription.key()] =
             SubscriptionWithToken(subscription, subscription.key().md5())
@@ -91,20 +92,22 @@ private class Database {
     }
 
     fun findAllSubscriptionsByTopicArn(topicArn: TopicArn, fromToken: Token?): SubscriptionsAndToken {
+        val topic = findTopicByArn(topicArn)
         return pagedFindAll(fromToken, topicSubscriptions.values,
             { elements ->
                 elements.sortedBy { swt -> swt.subscription.key() }
-                    .filter { it.subscription.topicArn == topicArn }
+                    .filter { it.subscription.topicArn == topic.arn }
             },
             { swt -> swt.subscription },
             { subscriptions, nextToken -> SubscriptionsAndToken(subscriptions, nextToken) })
     }
 
-    fun deleteSubscription(arn: SubscriptionArn): Boolean {
+    fun deleteSubscription(arn: SubscriptionArn): Subscription {
         val subscriptionWithToken =
-            topicSubscriptions.values.find { sub -> sub.subscription.arn == arn } ?: return false
+            topicSubscriptions.values.find { sub -> sub.subscription.arn == arn }
+                ?: throw SubscriptionNotFoundException(arn)
 
-        return topicSubscriptions.remove(subscriptionWithToken.subscription.key()) != null
+        return topicSubscriptions.remove(subscriptionWithToken.subscription.key())!!.subscription
     }
 
     fun <E : ElementWithToken, L, R> pagedFindAll(

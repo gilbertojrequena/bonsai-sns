@@ -10,10 +10,8 @@ import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
 class Unsubscribe(private val subscriptionManager: SubscriptionManager) : Action {
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
-        val deleted = subscriptionManager.delete(params["SubscriptionArn"] ?: throw TODO())
-        if (!deleted) {
-            throw TODO()
-        }
+        subscriptionManager.delete(params["SubscriptionArn"] ?: throw TODO())
+
         call.respondText {
             ObjectMapper.writeXmlElement(
                 jdom("UnsubscribeResponse") {

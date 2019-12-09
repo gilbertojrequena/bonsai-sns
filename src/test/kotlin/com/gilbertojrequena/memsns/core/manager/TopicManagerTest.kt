@@ -2,7 +2,7 @@ package com.gilbertojrequena.memsns.core.manager
 
 import com.gilbertojrequena.memsns.core.Topic
 import com.gilbertojrequena.memsns.core.actor.snsOpsActor
-import com.gilbertojrequena.memsns.core.exception.TopicAlreadyExist
+import com.gilbertojrequena.memsns.core.exception.TopicAlreadyExistException
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
@@ -53,7 +53,7 @@ internal class TopicManagerTest {
         runBlocking {
             topicManager.create(Topic("test-topic", "display-name"))
 
-            assertThrows<TopicAlreadyExist> {
+            assertThrows<TopicAlreadyExistException> {
                 runBlocking {
                     topicManager.create(Topic("test-topic", "display-name"))
                 }

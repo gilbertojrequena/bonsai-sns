@@ -2,17 +2,15 @@ package com.gilbertojrequena.memsns.core.manager
 
 import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import java.util.*
 
-class SubscriptionManager(private val snsOpActor: SendChannel<SnsOpsMessage>) {
+class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperationsManager(snsOpActor) {
 
     suspend fun create(subscription: Subscription): Subscription {
-        val topic = findTopicByArn(subscription.topicArn) ?: TODO("Exception")
+        val topic = findTopicByArn(subscription.topicArn)
 
-        val responseChannel = Channel<Subscription>()
-        snsOpActor.send(
+        return sendToActorAndReceive {
             SnsOpsMessage.SaveSubscription(
                 Subscription(
                     subscription.topicArn,
@@ -20,39 +18,33 @@ class SubscriptionManager(private val snsOpActor: SendChannel<SnsOpsMessage>) {
                     subscription.endpoint,
                     "owner",
                     "arn:memsns:sns:memsns-region:123456789:${topic.name}:${UUID.randomUUID()}"
-                ), responseChannel
+                ), it
             )
-        )
-        return responseChannel.receive()
+        }
     }
 
-    suspend fun findAll(nextToken: Token?): SubscriptionsAndToken {
-        val responseChannel = Channel<SubscriptionsAndToken>()
-        snsOpActor.send(SnsOpsMessage.FindAllSubscriptions(nextToken, responseChannel))
-        return responseChannel.receive()
+    suspend fun findAll(nextToken: Token? = null): SubscriptionsAndToken {
+        return sendToActorAndReceive { SnsOpsMessage.FindAllSubscriptions(nextToken, it) }
     }
 
-    suspend fun findAllByTopicArn(topicArn: TopicArn, token: Token?): SubscriptionsAndToken {
-        val responseChannel = Channel<SubscriptionsAndToken>()
-        snsOpActor.send(
+    suspend fun findAllByTopicArn(topicArn: TopicArn, token: Token? = null): SubscriptionsAndToken {
+        return sendToActorAndReceive {
             SnsOpsMessage.FindAllSubscriptionsByTopic(
                 topicArn,
-                token,
-                responseChannel
+                token, it
             )
-        )
-        return responseChannel.receive()
+        }
     }
 
-    private suspend fun findTopicByArn(topicArn: TopicArn): Topic? {
-        val responseChannel = Channel<Topic?>()
-        snsOpActor.send(SnsOpsMessage.FindTopicByArn(topicArn, responseChannel))
-        return responseChannel.receive()
+    private suspend fun findTopicByArn(topicArn: TopicArn): Topic {
+        return sendToActorAndReceive { SnsOpsMessage.FindTopicByArn(topicArn, it) }
     }
 
-    suspend fun delete(arn: SubscriptionArn): Boolean {
-        val responseChannel = Channel<Boolean>()
-        snsOpActor.send(SnsOpsMessage.DeleteSubscription(arn, responseChannel))
-        return responseChannel.receive()
+    suspend fun delete(arn: SubscriptionArn): Subscription? {
+        return try {
+            sendToActorAndReceive { SnsOpsMessage.DeleteSubscription(arn, it) }
+        } catch (e: Exception) {
+            null
+        }
     }
 }
