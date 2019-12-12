@@ -8,30 +8,10 @@ typealias Token = String
 data class Topic(
     val name: String,
     val displayName: String,
-    val deliveryRetry: DeliveryRetry = DeliveryRetry(),
     val arn: String = "",
     val attributes: List<Attribute> = listOf(),
     val tags: Map<String, String> = mapOf()
 ) {
-    data class DeliveryRetry(
-        val numberOfRetries: Int = 3,
-        val retriesWithoutDelay: Int = 0,
-        val minimumDelay: Int = 20,
-        val maximumDelay: Int = 10,
-        val minimumDelayRetries: Int = 0,
-        val maximumDelayRetries: Int = 0,
-        val maximumReceiveRate: Int? = null,
-        val retryBackOffFunction: RetryBackOffFunction = RetryBackOffFunction.LINEAR
-    ) {
-
-        enum class RetryBackOffFunction(name: String) {
-            LINEAR("Linear"),
-            ARITHMETIC("Arithmetic"),
-            GEOMETRIC("Geometric"),
-            EXPONENTIAL("Exponential")
-        }
-    }
-
     data class Attribute(val key: String, val value: String)
 }
 

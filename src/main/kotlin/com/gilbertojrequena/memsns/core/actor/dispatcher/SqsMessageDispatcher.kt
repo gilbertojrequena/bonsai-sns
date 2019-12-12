@@ -3,20 +3,18 @@ package com.gilbertojrequena.memsns.core.actor.dispatcher
 import com.gilbertojrequena.memsns.api.ObjectMapper
 import com.gilbertojrequena.memsns.core.SnsHttpClient
 import com.gilbertojrequena.memsns.core.Subscription
-import com.gilbertojrequena.memsns.core.Topic
 import mu.KotlinLogging
 
-class SqsMessageDispatcher(private val httpClient: SnsHttpClient) :
-    MessageDispatcher {
+class SqsMessageDispatcher(private val httpClient: SnsHttpClient) : MessageDispatcher {
 
     private val log = KotlinLogging.logger { }
 
-    override suspend fun publish(topic: Topic, subscription: Subscription, message: String, messageId: String) {
+    override suspend fun publish(subscription: Subscription, message: String, messageId: String) {
         log.debug { "Publishing: <$message> to subscription: $subscription" }
         val messageBody = ObjectMapper.json {
             it.put("Type", "Notification")
                 .put("MessageId", messageId)
-                .put("TopicArn", topic.arn)
+                .put("TopicArn", subscription.topicArn)
                 .put("Message", message)
                 .put("SignatureVersion", "1")
                 .put(
@@ -34,8 +32,7 @@ class SqsMessageDispatcher(private val httpClient: SnsHttpClient) :
         }
         httpClient.post(
             "${subscription.endpoint}?Action=SendMessage&MessageBody=${messageBody}&Version=2012-11-05",
-            "",
-            topic.deliveryRetry
+            ""
         )
         log.debug { "Finished publishing: <$message> to subscription: $subscription" }
     }

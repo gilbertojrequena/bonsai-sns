@@ -1,32 +1,33 @@
 package com.gilbertojrequena.memsns.core.actor
 
-import com.gilbertojrequena.memsns.core.*
+import com.gilbertojrequena.memsns.core.PublishRequest
+import com.gilbertojrequena.memsns.core.SnsHttpClient
+import com.gilbertojrequena.memsns.core.Subscription
 import com.gilbertojrequena.memsns.core.actor.dispatcher.HttpMessageDispatcher
 import com.gilbertojrequena.memsns.core.actor.dispatcher.SqsMessageDispatcher
 import com.gilbertojrequena.memsns.core.actor.message.PublishMessage
-import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
+import com.gilbertojrequena.memsns.core.exception.MessageDispatcherNotFoundException
+import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.launch
 
-fun publishActor(snsOpsActor: SendChannel<SnsOpsMessage>) = GlobalScope.actor<PublishMessage> {
-    with(MessageDispatchManager(snsOpsActor, SnsHttpClient())) {
-        for (message in channel) {
-            when (message) {
-                is PublishMessage.Publish -> dispatchMessages(
-                    message.publishRequest
-                )
+fun publishActor(subscriptionManager: SubscriptionManager) = GlobalScope.actor<PublishMessage> {
+        with(MessageDispatchManager(subscriptionManager, SnsHttpClient())) {
+            for (message in channel) {
+                when (message) {
+                    is PublishMessage.Publish -> dispatchMessages(
+                        message.publishRequest
+                    )
+                }
             }
         }
     }
-}
 
 private class MessageDispatchManager(
-    private val snsOpsActor: SendChannel<SnsOpsMessage>,
+    private val subscriptionManager: SubscriptionManager,
     snsHttpClient: SnsHttpClient
 ) {
 
@@ -41,21 +42,17 @@ private class MessageDispatchManager(
     suspend fun dispatchMessages(
         publishRequest: PublishRequest
     ) {
-        val subsAndToken = getSubscriptions(publishRequest)
-        for (subscription in subsAndToken.subscriptions) {
-            publishScope.launch {
-                val responseChannel = Channel<Topic?>()
-                snsOpsActor.send(SnsOpsMessage.FindTopicByArn(subscription.topicArn, responseChannel))
-                val topic = responseChannel.receive() ?: throw TODO()
-                val messageDispatcher = dispatcherByProtocol[subscription.protocol] ?: throw TODO()
-                messageDispatcher.publish(topic, subscription, publishRequest.message, publishRequest.messageId)
+        do {
+            val subsAndToken = subscriptionManager.findAllByTopicArn(publishRequest.topicArn)
+            for (subscription in subsAndToken.subscriptions) {
+                publishScope.launch {
+                    val messageDispatcher =
+                        dispatcherByProtocol[subscription.protocol] ?: throw MessageDispatcherNotFoundException(
+                            subscription.protocol
+                        )
+                    messageDispatcher.publish(subscription, publishRequest.message, publishRequest.messageId)
+                }
             }
-        }
-    }
-
-    private suspend fun getSubscriptions(publishRequest: PublishRequest): SubscriptionsAndToken {
-        val responseChannel = Channel<SubscriptionsAndToken>()
-        snsOpsActor.send(SnsOpsMessage.FindAllSubscriptionsByTopic(publishRequest.topicArn, null, responseChannel))
-        return responseChannel.receive() //TODO use the pagination
+        } while (subsAndToken.nextToken != null)
     }
 }

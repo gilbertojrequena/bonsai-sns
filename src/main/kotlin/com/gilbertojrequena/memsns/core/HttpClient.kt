@@ -1,6 +1,7 @@
 package com.gilbertojrequena.memsns.core
 
 import com.gilbertojrequena.memsns.api.isRetriable
+import com.gilbertojrequena.memsns.core.exception.HttpCallRetriableException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.request.post
@@ -8,35 +9,38 @@ import io.ktor.client.response.HttpResponse
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 
-//    TODO Retry logic
-//    https://docs.aws.amazon.com/sns/latest/dg/sns-message-delivery-retries.html
 class SnsHttpClient {
+    companion object {
+        private const val RETRY_DELAY = 1000L
+    }
 
-    //    TODO Try creating an actor for this
     private val log = KotlinLogging.logger { }
     private val client = HttpClient(Apache) {
-        followRedirects = true
+        followRedirects = false
     }
 
     suspend fun post(
         url: String,
-        message: String = "",
-        deliveryRetry: Topic.DeliveryRetry = Topic.DeliveryRetry()
+        message: String = ""
     ) {
         var retries = 0
-
-        while (retries < deliveryRetry.numberOfRetries) {
+        var immediateRetries = 0
+        while (immediateRetries < 3 || retries < 3) {
             try {
                 invoke(url, message)
                 return
             } catch (ex: Exception) {
-                log.warn { "Error executing HTTP call to $url, retrying in ${deliveryRetry.maximumDelay} seconds" }
-                delay(deliveryRetry.maximumDelay * 1000L)
-                retries++
+                if (immediateRetries >= 3) {
+                    log.warn { "Error executing HTTP call to $url, retrying in $RETRY_DELAY milliseconds" }
+                    delay(RETRY_DELAY)
+                    retries++
+                } else {
+                    log.warn { "Error executing HTTP call to $url, executing immediate retry" }
+                    immediateRetries++
+                }
             }
         }
-        log.warn { "Stopping HTTP calls to $url, no more retries left" }
-        //todo throw exception
+        log.error { "Stopping HTTP calls to $url, no more retries left" }
     }
 
     private suspend fun invoke(
@@ -50,7 +54,7 @@ class SnsHttpClient {
         log.debug { "Http(s) call for <$url> response status is ${response.status}" }
 
         if (response.status.isRetriable()) {
-            throw RuntimeException("") // TODO
+            throw HttpCallRetriableException()
         }
     }
 }

@@ -15,10 +15,11 @@ import io.ktor.server.netty.Netty
 
 internal fun Application.main() {
     val snsOpsActor = snsOpsActor()
+    val subscriptionManager = SubscriptionManager(snsOpsActor)
     val snsManager = RequestHandler(
         TopicManager(snsOpsActor),
-        SubscriptionManager(snsOpsActor),
-        PublicationManager(publishActor(snsOpsActor))
+        subscriptionManager,
+        PublicationManager(publishActor(subscriptionManager))
     )
 
     routing {

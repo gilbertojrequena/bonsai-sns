@@ -15,7 +15,6 @@ class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperationsManage
                 Topic(
                     topic.name,
                     topic.displayName,
-                    topic.deliveryRetry,
                     buildArn(topic),
                     topic.attributes,
                     topic.tags

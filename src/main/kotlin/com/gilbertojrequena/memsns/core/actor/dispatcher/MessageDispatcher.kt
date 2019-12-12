@@ -4,5 +4,5 @@ import com.gilbertojrequena.memsns.core.Subscription
 import com.gilbertojrequena.memsns.core.Topic
 
 interface MessageDispatcher {
-    suspend fun publish(topic: Topic, subscription: Subscription, message: String, messageId: String)
+    suspend fun publish(subscription: Subscription, message: String, messageId: String)
 }
