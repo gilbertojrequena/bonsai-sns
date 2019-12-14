@@ -4,7 +4,6 @@ import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import com.gilbertojrequena.memsns.core.exception.SubscriptionAlreadyExist
 import com.gilbertojrequena.memsns.core.exception.SubscriptionNotFoundException
-import com.gilbertojrequena.memsns.core.exception.TopicAlreadyExistException
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.SendChannel
@@ -53,7 +52,7 @@ private class Database {
 
     fun saveTopic(topic: Topic): Topic {
         if (topicExists(topic.arn)) {
-            throw TopicAlreadyExistException(topic.name)
+            return topic
         }
         topics[topic.arn] = TopicWithToken(topic, topic.arn.md5())
         return topic

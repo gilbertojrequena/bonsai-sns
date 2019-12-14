@@ -2,14 +2,12 @@ package com.gilbertojrequena.memsns.core.manager
 
 import com.gilbertojrequena.memsns.core.Topic
 import com.gilbertojrequena.memsns.core.actor.snsOpsActor
-import com.gilbertojrequena.memsns.core.exception.TopicAlreadyExistException
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class TopicManagerTest {
@@ -36,11 +34,10 @@ internal class TopicManagerTest {
     @Test
     fun `should create topic`() {
         runBlocking {
-            val topic = topicManager.create(Topic("test-topic", "display-name"))
+            val topic = topicManager.create(Topic("test-topic"))
 
             assertNotNull(topic)
             assertEquals("test-topic", topic.name)
-            assertEquals("display-name", topic.displayName)
             assertEquals("arn:memsns:sns:memsns-region:123456789:${topic.name}", topic.arn)
 
             val t = topicManager.findByArn(topic.arn)
@@ -49,15 +46,11 @@ internal class TopicManagerTest {
     }
 
     @Test
-    fun `should throw exception when trying to create existent topic`() {
+    fun `should return topic when trying to create existent topic`() {
         runBlocking {
-            topicManager.create(Topic("test-topic", "display-name"))
-
-            assertThrows<TopicAlreadyExistException> {
-                runBlocking {
-                    topicManager.create(Topic("test-topic", "display-name"))
-                }
-            }
+            val topic = topicManager.create(Topic("test-topic"))
+            val existentTopic = topicManager.create(Topic("test-topic"))
+            assertEquals(topic, existentTopic)
         }
     }
 
@@ -65,7 +58,7 @@ internal class TopicManagerTest {
     fun `should find all topics without token when there are less than 101`() {
         runBlocking {
             repeat(5) {
-                topicManager.create(Topic("test-topic-$it", "display-name-$it"))
+                topicManager.create(Topic("test-topic-$it"))
             }
             val topicsAndToken = topicManager.findAll()
             val token = topicsAndToken.nextToken
@@ -80,7 +73,7 @@ internal class TopicManagerTest {
     fun `should find all topics with token when there are more than 100`() {
         runBlocking {
             repeat(120) {
-                topicManager.create(Topic("test-topic-$it", "display-name-$it"))
+                topicManager.create(Topic("test-topic-$it"))
             }
             val hundredTopicsAndToken = topicManager.findAll()
 
@@ -104,7 +97,7 @@ internal class TopicManagerTest {
     @Test
     fun `should return true when topic exist`() {
         runBlocking {
-            val topic = topicManager.create(Topic("test-topic", "display-name"))
+            val topic = topicManager.create(Topic("test-topic"))
 
             assertTrue(topicManager.exists(topic.arn))
         }
@@ -122,7 +115,7 @@ internal class TopicManagerTest {
     @Test
     fun `should delete topic`() {
         runBlocking {
-            val topic = topicManager.create(Topic("test-topic", "display-name"))
+            val topic = topicManager.create(Topic("test-topic"))
 
             val deletedTopic = topicManager.delete(topic.arn)
             assertEquals(topic, deletedTopic)

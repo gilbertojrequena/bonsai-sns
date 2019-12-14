@@ -2,6 +2,7 @@ package com.gilbertojrequena.memsns.api.action
 
 import com.gilbertojrequena.memsns.api.ObjectMapper.writeXmlElement
 import com.gilbertojrequena.memsns.api.awsMetadata
+import com.gilbertojrequena.memsns.api.validateAndGet
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
@@ -12,7 +13,7 @@ class ListSubscriptionsByTopic(private val subscriptionManager: SubscriptionMana
     Action {
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         val subscriptionsAndToken =
-            subscriptionManager.findAllByTopicArn(params["TopicArn"] ?: throw TODO(), params["NextToken"])
+            subscriptionManager.findAllByTopicArn(params.validateAndGet("TopicArn"), params["NextToken"])
 
         call.respondText {
             writeXmlElement(jdom("ListSubscriptionsByTopicResponse") {

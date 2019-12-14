@@ -29,7 +29,6 @@ internal class SubscriptionManagerTest {
                 SnsOpsMessage.SaveTopic(
                     Topic(
                         name = "test-topic",
-                        displayName = "test-topic",
                         arn = "test-topic-arn"
                     ), topicResponse
                 )

@@ -1,6 +1,7 @@
 package com.gilbertojrequena.memsns.api.action
 
 import com.gilbertojrequena.memsns.api.action
+import com.gilbertojrequena.memsns.api.exception.ActionNotFoundException
 import com.gilbertojrequena.memsns.core.manager.PublicationManager
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import com.gilbertojrequena.memsns.core.manager.TopicManager
@@ -57,7 +58,7 @@ class RequestHandler(
 
     suspend fun processRequest(call: ApplicationCall) {
         val params = call.receive<Parameters>()
-        val action = actions[params.action()] ?: throw TODO()
+        val action = actions[params.action()] ?: throw ActionNotFoundException(params.action())
         log.debug { "Executing action: ${action.javaClass.simpleName} with params: $params" }
         action.execute(call, params)
     }

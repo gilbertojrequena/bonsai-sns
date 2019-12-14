@@ -7,7 +7,6 @@ typealias Token = String
 
 data class Topic(
     val name: String,
-    val displayName: String,
     val arn: String = "",
     val attributes: List<Attribute> = listOf(),
     val tags: Map<String, String> = mapOf()

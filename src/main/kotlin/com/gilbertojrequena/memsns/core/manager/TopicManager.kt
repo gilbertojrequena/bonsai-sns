@@ -14,7 +14,6 @@ class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperationsManage
             SnsOpsMessage.SaveTopic(
                 Topic(
                     topic.name,
-                    topic.displayName,
                     buildArn(topic),
                     topic.attributes,
                     topic.tags
