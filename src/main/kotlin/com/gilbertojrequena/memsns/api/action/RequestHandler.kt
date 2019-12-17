@@ -48,7 +48,7 @@ class RequestHandler(
         "SetEndpointAttributes" to SetEndpointAttributes(),
         "SetPlatformApplicationAttributes" to SetPlatformApplicationAttributes(),
         "SetSMSAttributes" to SetSMSAttributes(),
-        "SetSubscriptionAttributes" to SetSubscriptionAttributes(),
+        "SetSubscriptionAttributes" to SetSubscriptionAttributes(subscriptionManager),
         "SetTopicAttributes" to SetTopicAttributes(),
         "Subscribe" to Subscribe(subscriptionManager),
         "TagResource" to TagResource(),

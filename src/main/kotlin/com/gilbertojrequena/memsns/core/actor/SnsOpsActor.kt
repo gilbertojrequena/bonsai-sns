@@ -2,7 +2,6 @@ package com.gilbertojrequena.memsns.core.actor
 
 import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
-import com.gilbertojrequena.memsns.core.exception.SubscriptionAlreadyExist
 import com.gilbertojrequena.memsns.core.exception.SubscriptionNotFoundException
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
 import kotlinx.coroutines.GlobalScope
@@ -21,6 +20,7 @@ fun snsOpsActor() = GlobalScope.actor<SnsOpsMessage> {
                 is SnsOpsMessage.FindTopicByArn -> sendOrClose(message.response) { findTopicByArn(message.arn) }
                 is SnsOpsMessage.TopicExists -> message.response.send(topicExists(message.arn))
                 is SnsOpsMessage.DeleteTopic -> sendOrClose(message.response) { deleteTopic(message.arn) }
+                is SnsOpsMessage.FindSubscriptionByArn -> sendOrClose(message.response) { findSubscriptionByArn(message.arn) }
                 is SnsOpsMessage.FindAllSubscriptions -> message.response.send(findAllSubscriptions(message.fromToken))
                 is SnsOpsMessage.SaveSubscription -> sendOrClose(message.response) { saveSubscription(message.subscription) }
                 is SnsOpsMessage.FindAllSubscriptionsByTopic -> sendOrClose(message.response) {
@@ -30,6 +30,13 @@ fun snsOpsActor() = GlobalScope.actor<SnsOpsMessage> {
                     )
                 }
                 is SnsOpsMessage.DeleteSubscription -> sendOrClose(message.response) { deleteSubscription(message.arn) }
+                is SnsOpsMessage.SetSubscriptionAttribute -> sendOrClose(message.response) {
+                    saveSubscriptionAttribute(
+                        message.arn,
+                        message.attribute
+                    )
+                }
+                is SnsOpsMessage.GetSubscriptionAttributes -> message.response.send(getSubscriptionAttributes(message.arn))
             }
         }
     }
@@ -46,7 +53,8 @@ private suspend fun <E> sendOrClose(channel: SendChannel<E>, block: () -> E) {
 private class Database {
 
     private val topics: MutableMap<TopicArn, TopicWithToken> = mutableMapOf()
-    private val topicSubscriptions: MutableMap<SubscriptionKey, SubscriptionWithToken> = mutableMapOf()
+    private val subscriptions: MutableMap<SubscriptionArn, SubscriptionWithToken> = mutableMapOf()
+    private val subscriptionAttributes: MutableMap<SubscriptionArn, Map<String, String>> = mutableMapOf()
 
     fun topicExists(arn: TopicArn): Boolean = topics.containsKey(arn)
 
@@ -71,30 +79,28 @@ private class Database {
 
     fun findTopicByArn(arn: TopicArn): Topic = topics[arn]?.topic ?: throw TopicNotFoundException(arn)
 
-    fun subscriptionExists(subscription: Subscription) =
-        topicSubscriptions.containsKey(subscription.key())
-
     fun saveSubscription(subscription: Subscription): Subscription {
-        if (subscriptionExists(subscription)) {
-            throw SubscriptionAlreadyExist(subscription)
-        }
-        topicSubscriptions[subscription.key()] =
-            SubscriptionWithToken(subscription, subscription.key().md5())
+        subscriptions[subscription.arn] =
+            SubscriptionWithToken(subscription, subscription.arn.md5())
         return subscription
     }
 
+    fun findSubscriptionByArn(arn: SubscriptionArn): Subscription {
+        return (subscriptions[arn] ?: throw SubscriptionNotFoundException(arn)).subscription
+    }
+
     fun findAllSubscriptions(fromToken: Token?): SubscriptionsAndToken {
-        return pagedFindAll(fromToken, topicSubscriptions.values,
-            { elements -> elements.sortedBy { it.subscription.key() } },
+        return pagedFindAll(fromToken, subscriptions.values,
+            { elements -> elements.sortedBy { it.subscription.arn } },
             { swt -> swt.subscription },
             { subscriptions, nextToken -> SubscriptionsAndToken(subscriptions, nextToken) })
     }
 
     fun findAllSubscriptionsByTopicArn(topicArn: TopicArn, fromToken: Token?): SubscriptionsAndToken {
         val topic = findTopicByArn(topicArn)
-        return pagedFindAll(fromToken, topicSubscriptions.values,
+        return pagedFindAll(fromToken, subscriptions.values,
             { elements ->
-                elements.sortedBy { swt -> swt.subscription.key() }
+                elements.sortedBy { swt -> swt.subscription.arn }
                     .filter { it.subscription.topicArn == topic.arn }
             },
             { swt -> swt.subscription },
@@ -103,10 +109,20 @@ private class Database {
 
     fun deleteSubscription(arn: SubscriptionArn): Subscription {
         val subscriptionWithToken =
-            topicSubscriptions.values.find { sub -> sub.subscription.arn == arn }
+            subscriptions.values.find { sub -> sub.subscription.arn == arn }
                 ?: throw SubscriptionNotFoundException(arn)
 
-        return topicSubscriptions.remove(subscriptionWithToken.subscription.key())!!.subscription
+        return subscriptions.remove(subscriptionWithToken.subscription.arn)!!.subscription
+    }
+
+    fun saveSubscriptionAttribute(arn: SubscriptionArn, attribute: Attribute): Attribute {
+        subscriptionAttributes.computeIfAbsent(arn) { mapOf(attribute) }
+        subscriptionAttributes.computeIfPresent(arn) { _, attributes -> attributes.plus(attribute) }
+        return attribute
+    }
+
+    fun getSubscriptionAttributes(arn: SubscriptionArn): Attributes {
+        return subscriptionAttributes.getOrDefault(arn, mapOf())
     }
 
     fun <E : ElementWithToken, L, R> pagedFindAll(
@@ -133,8 +149,6 @@ private class Database {
     private class SubscriptionWithToken(val subscription: Subscription, token: Token) : ElementWithToken(token)
 
     private open class ElementWithToken(val token: Token)
-
-    private fun Subscription.key(): SubscriptionKey = this.topicArn + this.protocol + this.endpoint
 
     private fun String.md5(): String {
         val md = MessageDigest.getInstance("MD5")

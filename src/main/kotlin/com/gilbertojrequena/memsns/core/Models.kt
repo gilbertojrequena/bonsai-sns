@@ -2,8 +2,9 @@ package com.gilbertojrequena.memsns.core
 
 typealias TopicArn = String
 typealias SubscriptionArn = String
-typealias SubscriptionKey = String
 typealias Token = String
+typealias Attribute = Pair<String, String>
+typealias Attributes = Map<String, String>
 
 data class Topic(
     val name: String,
@@ -36,6 +37,8 @@ data class Subscription(
         }
     }
 }
+
+data class SubscriptionWithAttributes(val subscription: Subscription, val attributes: Attributes)
 
 data class PublishRequest(val topicArn: String, val message: String, val messageId: String = "")
 

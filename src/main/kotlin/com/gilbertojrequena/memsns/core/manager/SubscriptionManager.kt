@@ -23,6 +23,10 @@ class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperation
         }
     }
 
+    suspend fun findByArn(arn: SubscriptionArn): Subscription {
+        return sendToActorAndReceive { SnsOpsMessage.FindSubscriptionByArn(arn, it) }
+    }
+
     suspend fun findAll(nextToken: Token? = null): SubscriptionsAndToken {
         return sendToActorAndReceive { SnsOpsMessage.FindAllSubscriptions(nextToken, it) }
     }
@@ -36,15 +40,29 @@ class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperation
         }
     }
 
-    private suspend fun findTopicByArn(topicArn: TopicArn): Topic {
-        return sendToActorAndReceive { SnsOpsMessage.FindTopicByArn(topicArn, it) }
+    suspend fun delete(arn: SubscriptionArn): Subscription {
+        return sendToActorAndReceive { SnsOpsMessage.DeleteSubscription(arn, it) }
     }
 
-    suspend fun delete(arn: SubscriptionArn): Subscription? {
-        return try {
-            sendToActorAndReceive { SnsOpsMessage.DeleteSubscription(arn, it) }
-        } catch (e: Exception) {
-            null
+    suspend fun setSubscriptionAttribute(
+        arn: SubscriptionArn,
+        attributeName: String,
+        attributeValue: String
+    ): Attribute {
+        return sendToActorAndReceive {
+            SnsOpsMessage.SetSubscriptionAttribute(
+                arn, attributeName to attributeValue, it
+            )
         }
+    }
+
+    suspend fun findSubscriptionAttributes(arn: SubscriptionArn): Attributes {
+        return sendToActorAndReceive {
+            SnsOpsMessage.GetSubscriptionAttributes(arn, it)
+        }
+    }
+
+    private suspend fun findTopicByArn(topicArn: TopicArn): Topic {
+        return sendToActorAndReceive { SnsOpsMessage.FindTopicByArn(topicArn, it) }
     }
 }

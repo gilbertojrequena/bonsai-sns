@@ -23,7 +23,7 @@ internal fun Application.main() {
     val snsManager = RequestHandler(
         TopicManager(snsOpsActor),
         subscriptionManager,
-        PublicationManager(publishActor(subscriptionManager))
+        PublicationManager(publishActor(subscriptionManager, environment.config))
     )
 
     install(StatusPages) {

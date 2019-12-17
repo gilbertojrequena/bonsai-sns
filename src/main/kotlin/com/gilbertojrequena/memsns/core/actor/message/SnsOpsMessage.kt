@@ -17,6 +17,7 @@ sealed class SnsOpsMessage {
     class SaveSubscription(val subscription: Subscription, val response: SendChannel<Subscription>) :
         SnsOpsMessage()
 
+    class FindSubscriptionByArn(val arn: SubscriptionArn, val response: SendChannel<Subscription>) : SnsOpsMessage()
     class FindAllSubscriptionsByTopic(
         val topicArn: TopicArn,
         val fromToken: Token? = null,
@@ -25,4 +26,14 @@ sealed class SnsOpsMessage {
         SnsOpsMessage()
 
     class DeleteSubscription(val arn: SubscriptionArn, val response: SendChannel<Subscription>) : SnsOpsMessage()
+    class SetSubscriptionAttribute(
+        val arn: SubscriptionArn,
+        val attribute: Attribute,
+        val response: SendChannel<Attribute>
+    ) : SnsOpsMessage()
+
+    class GetSubscriptionAttributes(
+        val arn: SubscriptionArn,
+        val response: SendChannel<Attributes>
+    ) : SnsOpsMessage()
 }

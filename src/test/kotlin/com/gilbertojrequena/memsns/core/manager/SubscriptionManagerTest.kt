@@ -5,7 +5,7 @@ import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTP
 import com.gilbertojrequena.memsns.core.Topic
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import com.gilbertojrequena.memsns.core.actor.snsOpsActor
-import com.gilbertojrequena.memsns.core.exception.SubscriptionAlreadyExist
+import com.gilbertojrequena.memsns.core.exception.SubscriptionNotFoundException
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
@@ -59,12 +59,10 @@ internal class SubscriptionManagerTest {
     }
 
     @Test
-    fun `should throw exception when trying to subscribe to the same topic with the same protocol and endpoint`() {
-        assertThrows<SubscriptionAlreadyExist> {
-            runBlocking {
-                repeat(2) {
-                    subscriptionManager.create(Subscription("test-topic-arn", HTTP, "endpoint"))
-                }
+    fun `should not throw exception when trying to subscribe to the same topic with the same protocol and endpoint`() {
+        runBlocking {
+            repeat(2) {
+                subscriptionManager.create(Subscription("test-topic-arn", HTTP, "endpoint"))
             }
         }
     }
@@ -152,8 +150,8 @@ internal class SubscriptionManagerTest {
     }
 
     @Test
-    fun `should not throw exception when trying to delete non existent subscription`() {
-        assertDoesNotThrow {
+    fun `should throw exception when trying to delete non existent subscription`() {
+        assertThrows<SubscriptionNotFoundException> {
             runBlocking {
                 subscriptionManager.delete("nope")
             }
