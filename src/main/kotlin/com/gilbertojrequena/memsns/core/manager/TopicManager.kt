@@ -38,5 +38,5 @@ class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperationsManage
         return sendToActorAndReceive { SnsOpsMessage.DeleteTopic(arn, it) }
     }
 
-    private fun buildArn(topic: Topic) = "arn:memsns:sns:memsns-region:123456789:${topic.name}"
+    private fun buildArn(topic: Topic) = "arn:aws:sns:memsns-region:123456789:${topic.name}"
 }

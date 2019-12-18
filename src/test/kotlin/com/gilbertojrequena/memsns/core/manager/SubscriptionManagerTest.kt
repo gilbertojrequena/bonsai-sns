@@ -51,7 +51,7 @@ internal class SubscriptionManagerTest {
         runBlocking {
             val subscription = subscriptionManager.create(Subscription("test-topic-arn", HTTP, "endpoint"))
             assertEquals("test-topic-arn", subscription.topicArn)
-//                assertEquals("arn:memsns:sns:memsns-region:123456789:test-topic:", subscription.arn)
+            assertTrue(subscription.arn.contains("arn:aws:sns:memsns-region:123456789:test-topic:"))
             assertEquals(HTTP, subscription.protocol)
             assertEquals("endpoint", subscription.endpoint)
             assertEquals("owner", subscription.owner)

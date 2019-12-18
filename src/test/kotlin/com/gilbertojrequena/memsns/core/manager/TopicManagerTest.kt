@@ -38,7 +38,7 @@ internal class TopicManagerTest {
 
             assertNotNull(topic)
             assertEquals("test-topic", topic.name)
-            assertEquals("arn:memsns:sns:memsns-region:123456789:${topic.name}", topic.arn)
+            assertEquals("arn:aws:sns:memsns-region:123456789:${topic.name}", topic.arn)
 
             val t = topicManager.findByArn(topic.arn)
             assertEquals(topic, t)

@@ -17,7 +17,7 @@ class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperation
                     subscription.protocol,
                     subscription.endpoint,
                     "owner",
-                    "arn:memsns:sns:memsns-region:123456789:${topic.name}:${UUID.randomUUID()}"
+                    "arn:aws:sns:memsns-region:123456789:${topic.name}:${UUID.randomUUID()}"
                 ), it
             )
         }
