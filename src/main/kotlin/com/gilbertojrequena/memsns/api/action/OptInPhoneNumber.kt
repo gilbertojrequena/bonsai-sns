@@ -1,6 +1,5 @@
 package com.gilbertojrequena.memsns.api.action
 
-import com.gilbertojrequena.memsns.api.action.Action
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 
