@@ -7,7 +7,7 @@ import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class ConfirmSubscription: Action {
+class ConfirmSubscription : Action {
 
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         call.respondText {
@@ -15,7 +15,7 @@ class ConfirmSubscription: Action {
                 jdom("ConfirmSubscriptionResponse") {
                     element("ConfirmSubscriptionResult") {
                         element("SubscriptionArn") {
-                            text("") //TODO
+                            text("arn:memsns:sns:sns:memsns-region:123456789012:topic:this-is-actually-not-real")
                         }
                     }
                     awsMetadata()
