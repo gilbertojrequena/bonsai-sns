@@ -29,7 +29,7 @@ class RequestHandler(
         "GetEndpointAttributes" to GetEndpointAttributes(),
         "GetPlatformApplicationAttributes" to GetPlatformApplicationAttributes(),
         "GetSMSAttributes" to GetSMSAttributes(),
-        "GetSubscriptionAttributes" to GetSubscriptionAttributes(),
+        "GetSubscriptionAttributes" to GetSubscriptionAttributes(subscriptionManager),
         "GetTopicAttributes" to GetTopicAttributes(),
         "ListEndpointsByPlatformApplication" to ListEndpointsByPlatformApplication(),
         "ListPhoneNumbersOptedOut" to ListPhoneNumbersOptedOut(),
