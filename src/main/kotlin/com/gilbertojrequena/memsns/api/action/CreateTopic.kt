@@ -17,7 +17,7 @@ class CreateTopic(private val topicManager: TopicManager) :
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         val topic = topicManager.create(params.createTopicData())
 
-        log.debug { "Topic $topic created" }
+        log.info { "Topic $topic created" }
         call.respondText {
             writeXmlElement(
                 jdom("CreateTopicResponse") {

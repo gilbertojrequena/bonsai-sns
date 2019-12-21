@@ -1,5 +1,6 @@
 package com.gilbertojrequena.memsns.core.manager
 
+import com.gilbertojrequena.memsns.core.Config
 import com.gilbertojrequena.memsns.core.Topic
 import com.gilbertojrequena.memsns.core.actor.snsOpsActor
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
@@ -11,8 +12,8 @@ import org.junit.jupiter.api.assertThrows
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class TopicManagerTest {
-
-    private val topicManager = TopicManager(snsOpsActor())
+    private val config = Config(1234, "region", 123456789)
+    private val topicManager = TopicManager(snsOpsActor(), config)
 
     @Test
     fun `should throw exception when topic is not found`() {
@@ -38,7 +39,7 @@ internal class TopicManagerTest {
 
             assertNotNull(topic)
             assertEquals("test-topic", topic.name)
-            assertEquals("arn:aws:sns:memsns-region:123456789:${topic.name}", topic.arn)
+            assertEquals("arn:aws:sns:${config.region}:${config.accountId}:${topic.name}", topic.arn)
 
             val t = topicManager.findByArn(topic.arn)
             assertEquals(topic, t)

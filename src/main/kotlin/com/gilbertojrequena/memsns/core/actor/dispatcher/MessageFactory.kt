@@ -1,12 +1,11 @@
 package com.gilbertojrequena.memsns.core.actor.dispatcher
 
 import com.gilbertojrequena.memsns.api.ObjectMapper
+import com.gilbertojrequena.memsns.core.Config
 import com.gilbertojrequena.memsns.core.SubscriptionWithAttributes
-import io.ktor.config.ApplicationConfig
+import java.net.URLEncoder
 
-class MessageFactory(config: ApplicationConfig) {
-
-    private val port = config.property("ktor.deployment.port").getString()
+class MessageFactory(private val config: Config) {
 
     fun create(
         text: String,
@@ -28,13 +27,20 @@ class MessageFactory(config: ApplicationConfig) {
                     )
                     .put(
                         "SigningCertURL",
-                        "https://localhost:$port/SimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem"
+                        encode("https://localhost:${config.port}/SimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem")
                     )
                     .put(
                         "UnsubscribeURL",
-                        "http://localhost:$port/?Action=Unsubscribe&SubscriptionArn=${subscriptionWithAttributes.subscription.arn}"
+                        encode("http://localhost:${config.port}/?Action=Unsubscribe&SubscriptionArn=${subscriptionWithAttributes.subscription.arn}")
                     )
             }
         }
+    }
+
+    private fun encode(url: String): String {
+        return URLEncoder.encode(
+            url,
+            "utf-8"
+        )
     }
 }

@@ -3,9 +3,10 @@ package com.gilbertojrequena.memsns.core.manager
 import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import kotlinx.coroutines.channels.SendChannel
-import java.util.*
+import java.lang.Integer.toHexString
 
-class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperationsManager(snsOpActor) {
+class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: Config) :
+    SqsOperationsManager(snsOpActor) {
 
     suspend fun create(subscription: Subscription): Subscription {
         val topic = findTopicByArn(subscription.topicArn)
@@ -17,14 +18,16 @@ class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperation
                     subscription.protocol,
                     subscription.endpoint,
                     "owner",
-                    "arn:aws:sns:memsns-region:123456789:${topic.name}:${UUID.randomUUID()}"
+                    "arn:aws:sns:${config.region}:${config.accountId}:${topic.name}:${buildSubscriptionHash(subscription)}"
                 ), it
             )
         }
     }
 
-    suspend fun findByArn(arn: SubscriptionArn): Subscription {
-        return sendToActorAndReceive { SnsOpsMessage.FindSubscriptionByArn(arn, it) }
+    private fun buildSubscriptionHash(subscription: Subscription): String {
+        return "${toHexString(subscription.topicArn.hashCode())}-${toHexString(subscription.protocol.hashCode())}-${toHexString(
+            subscription.endpoint.hashCode()
+        )}"
     }
 
     suspend fun findAll(nextToken: Token? = null): SubscriptionsAndToken {

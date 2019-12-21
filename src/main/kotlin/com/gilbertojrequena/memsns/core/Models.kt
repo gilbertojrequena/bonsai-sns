@@ -45,3 +45,5 @@ data class PublishRequest(val topicArn: String, val message: String, val message
 data class TopicsAndToken(val topics: List<Topic>, val nextToken: Token?)
 
 data class SubscriptionsAndToken(val subscriptions: List<Subscription>, val nextToken: String?)
+
+data class Config(val port: Int, val region: String, val accountId: Long)

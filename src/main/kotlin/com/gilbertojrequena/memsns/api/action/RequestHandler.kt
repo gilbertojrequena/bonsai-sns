@@ -2,6 +2,7 @@ package com.gilbertojrequena.memsns.api.action
 
 import com.gilbertojrequena.memsns.api.action
 import com.gilbertojrequena.memsns.api.exception.ActionNotFoundException
+import com.gilbertojrequena.memsns.core.Config
 import com.gilbertojrequena.memsns.core.manager.PublicationManager
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import com.gilbertojrequena.memsns.core.manager.TopicManager
@@ -13,15 +14,16 @@ import mu.KotlinLogging
 class RequestHandler(
     topicManager: TopicManager,
     subscriptionManager: SubscriptionManager,
-    publicationManager: PublicationManager
+    publicationManager: PublicationManager,
+    config: Config
 ) {
     private val log = KotlinLogging.logger {}
     private val actions: Map<String, Action> = mapOf(
         "AddPermission" to AddPermission(),
         "CheckIfPhoneNumberIsOptedOut" to CheckIfPhoneNumberIsOptedOut(),
-        "ConfirmSubscription" to ConfirmSubscription(),
-        "CreatePlatformApplication" to CreatePlatformApplication(),
-        "CreatePlatformEndpoint" to CreatePlatformEndpoint(),
+        "ConfirmSubscription" to ConfirmSubscription(config),
+        "CreatePlatformApplication" to CreatePlatformApplication(config),
+        "CreatePlatformEndpoint" to CreatePlatformEndpoint(config),
         "CreateTopic" to CreateTopic(topicManager),
         "DeleteEndpoint" to DeleteEndpoint(),
         "DeletePlatformApplication" to DeletePlatformApplication(),

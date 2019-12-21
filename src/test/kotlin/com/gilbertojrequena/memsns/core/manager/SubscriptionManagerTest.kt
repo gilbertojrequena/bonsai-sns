@@ -1,5 +1,6 @@
 package com.gilbertojrequena.memsns.core.manager
 
+import com.gilbertojrequena.memsns.core.Config
 import com.gilbertojrequena.memsns.core.Subscription
 import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTP
 import com.gilbertojrequena.memsns.core.Topic
@@ -18,8 +19,9 @@ import org.junit.jupiter.api.assertThrows
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class SubscriptionManagerTest {
 
+    private val config = Config(1234, "region", 123456789)
     private val snsOpActor = snsOpsActor()
-    private val subscriptionManager = SubscriptionManager(snsOpActor)
+    private val subscriptionManager = SubscriptionManager(snsOpActor, config)
 
     @BeforeEach
     fun setUp() {
@@ -51,7 +53,7 @@ internal class SubscriptionManagerTest {
         runBlocking {
             val subscription = subscriptionManager.create(Subscription("test-topic-arn", HTTP, "endpoint"))
             assertEquals("test-topic-arn", subscription.topicArn)
-            assertTrue(subscription.arn.contains("arn:aws:sns:memsns-region:123456789:test-topic:"))
+            assertTrue(subscription.arn.contains("arn:aws:sns:${config.region}:${config.accountId}:test-topic:"))
             assertEquals(HTTP, subscription.protocol)
             assertEquals("endpoint", subscription.endpoint)
             assertEquals("owner", subscription.owner)

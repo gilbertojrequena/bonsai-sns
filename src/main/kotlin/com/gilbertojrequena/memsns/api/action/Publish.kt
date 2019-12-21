@@ -17,7 +17,7 @@ class Publish(private val publicationManager: PublicationManager) :
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         val messageId = publicationManager.publish(params.createPublishRequest())
 
-        log.debug { "Message $messageId saved and ready to be published" }
+        log.debug { "Message $messageId ready to be published" }
         call.respondText {
             writeXmlElement(jdom("PublishResponse") {
                 element("PublishResult") {

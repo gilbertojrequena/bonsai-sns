@@ -112,6 +112,7 @@ private class Database {
             subscriptions.values.find { sub -> sub.subscription.arn == arn }
                 ?: throw SubscriptionNotFoundException(arn)
 
+        subscriptionAttributes.remove(subscriptionWithToken.subscription.arn)
         return subscriptions.remove(subscriptionWithToken.subscription.arn)!!.subscription
     }
 

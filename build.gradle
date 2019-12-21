@@ -28,6 +28,8 @@ dependencies {
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.5.2'
     testCompile 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
     testCompile 'io.mockk:mockk:1.9.3'
+    testCompile 'com.amazonaws:aws-java-sdk-sns:1.11.694'
+    testCompile 'org.elasticmq:elasticmq-rest-sqs_2.12:0.15.3'
 }
 
 compileKotlin {

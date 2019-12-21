@@ -1,13 +1,11 @@
 package com.gilbertojrequena.memsns.core.manager
 
-import com.gilbertojrequena.memsns.core.Token
-import com.gilbertojrequena.memsns.core.Topic
-import com.gilbertojrequena.memsns.core.TopicArn
-import com.gilbertojrequena.memsns.core.TopicsAndToken
+import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import kotlinx.coroutines.channels.SendChannel
 
-class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperationsManager(snsOpActor) {
+class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: Config) :
+    SqsOperationsManager(snsOpActor) {
 
     suspend fun create(topic: Topic): Topic {
         return sendToActorAndReceive {
@@ -38,5 +36,5 @@ class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>) : SqsOperationsManage
         return sendToActorAndReceive { SnsOpsMessage.DeleteTopic(arn, it) }
     }
 
-    private fun buildArn(topic: Topic) = "arn:aws:sns:memsns-region:123456789:${topic.name}"
+    private fun buildArn(topic: Topic) = "arn:aws:sns:${config.region}:${config.accountId}:${topic.name}"
 }
