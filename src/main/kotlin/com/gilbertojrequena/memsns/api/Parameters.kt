@@ -20,7 +20,8 @@ fun Parameters.createTopicSubscriptionData(): Subscription = Subscription(
     Subscription.Protocol.fromName(this.validateAndGet("Protocol")), this.validateAndGet("Endpoint")
 )
 
-fun Parameters.createPublishRequest() = PublishRequest(this.validateAndGet("TopicArn"), this.validateAndGet("Message", "Empty Message"))
+fun Parameters.createPublishRequest() =
+    PublishRequest(this.validateAndGet("TopicArn"), this.validateAndGet("Message", "Empty Message"))
 
 fun Parameters.action(): String {
     return this.validateAndGet("Action")

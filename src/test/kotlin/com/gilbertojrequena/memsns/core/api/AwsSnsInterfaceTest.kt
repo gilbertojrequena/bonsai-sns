@@ -7,18 +7,24 @@ import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder
 import com.amazonaws.services.sns.model.*
 import com.amazonaws.services.sns.model.Tag
-import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.gilbertojrequena.memsns.server.MemSnsServer
 import io.ktor.application.call
 import io.ktor.request.receiveText
 import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.routing.routing
+import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.elasticmq.rest.sqs.SQSRestServer
 import org.elasticmq.rest.sqs.SQSRestServerBuilder
 import org.junit.jupiter.api.*
@@ -29,11 +35,13 @@ internal class AwsSnsInterfaceTest {
 
     companion object {
         private lateinit var snsClient: AmazonSNS
-        private lateinit var sqsClient: AmazonSQS
+        private lateinit var sqsClient: AmazonSQSAsync
         private lateinit var server: MemSnsServer
         private lateinit var sQSRestServer: SQSRestServer
         private lateinit var testTopicArn: String
         private lateinit var testQueueUrl: String
+        private lateinit var httpServer: ApplicationEngine
+        private val httpMessagesChannel = Channel<String>()
         private val basicAWSCredentials = BasicAWSCredentials("foo", "bar")
         private const val region = "region"
         private const val port = 7979
@@ -42,7 +50,7 @@ internal class AwsSnsInterfaceTest {
         @JvmStatic
         @BeforeAll
         fun setUp() {
-            server = MemSnsServer.Builder().region(region).accountId(accountId).port(port).build().start()
+            server = MemSnsServer.builder().withRegion(region).withAccountId(accountId).withPort(port).start()
             sQSRestServer = SQSRestServerBuilder.withPort(9325).withInterface("localhost").start()
             sqsClient = AmazonSQSAsyncClientBuilder.standard()
                 .withCredentials(AWSStaticCredentialsProvider(basicAWSCredentials))
@@ -53,7 +61,22 @@ internal class AwsSnsInterfaceTest {
                 .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://localhost:$port", region))
                 .build()
 
-
+            val env = applicationEngineEnvironment {
+                module {
+                    routing {
+                        route("/target") {
+                            post {
+                                httpMessagesChannel.send(call.receiveText())
+                            }
+                        }
+                    }
+                }
+                connector {
+                    host = "0.0.0.0"
+                    port = 7777
+                }
+            }
+            httpServer = embeddedServer(Netty, env).start()
         }
 
         @JvmStatic
@@ -61,17 +84,18 @@ internal class AwsSnsInterfaceTest {
         fun shutDown() {
             server.stop()
             sQSRestServer.stopAndWait()
+            httpServer.stop(0, 1, TimeUnit.MILLISECONDS)
         }
     }
 
     @BeforeEach
-    fun setUp1() {
+    fun beforeEach() {
         testTopicArn = snsClient.createTopic("test-topic").topicArn
         testQueueUrl = sqsClient.createQueue("test-queue").queueUrl
     }
 
     @AfterEach
-    fun shutDown1() {
+    fun afterEach() {
         snsClient.listSubscriptions().subscriptions.forEach { snsClient.unsubscribe(it.subscriptionArn) }
         snsClient.listTopics().topics.forEach { snsClient.deleteTopic(it.topicArn) }
         sqsClient.listQueues().queueUrls.forEach { sqsClient.deleteQueue(it) }
@@ -141,63 +165,20 @@ internal class AwsSnsInterfaceTest {
     }
 
     @Test
-    fun `should publish http message`() {
-        var receivedMessage = ""
-        val env = applicationEngineEnvironment {
-            module {
-                routing {
-                    route("/target") {
-                        post {
-                            receivedMessage = call.receiveText()
-                        }
-                    }
-                }
-            }
-            connector {
-                host = "0.0.0.0"
-                port = 7777
-            }
-        }
-        val server = embeddedServer(Netty, env).start()
-        try {
-            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
-            snsClient.publish(PublishRequest(testTopicArn, "message"))
-            Thread.sleep(200)
-            print(receivedMessage)
-            assertTrue(receivedMessage.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https%3A%2F%2Flocalhost%3A$port%2FSimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http%3A%2F%2Flocalhost%3A$port%2F%3FAction%3DUnsubscribe%26SubscriptionArn%3Darn%3Aaws%3Asns%3A$region%3A$accountId%3Atest-topic%3A[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\"}")))
-        } finally {
-            server.stop(1, 2, TimeUnit.MILLISECONDS)
-        }
+    fun `should publish http message`() = runBlocking {
+        snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        val message = httpMessagesChannel.receive()
+        assertTrue(message.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https%3A%2F%2Flocalhost%3A$port%2FSimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http%3A%2F%2Flocalhost%3A$port%2F%3FAction%3DUnsubscribe%26SubscriptionArn%3Darn%3Aaws%3Asns%3A$region%3A$accountId%3Atest-topic%3A[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\"}")))
     }
 
     @Test
-    fun `should publish raw message to http endpoint`() {
-        var receivedMessage = ""
-        val env = applicationEngineEnvironment {
-            module {
-                routing {
-                    route("/target") {
-                        post {
-                            receivedMessage = call.receiveText()
-                        }
-                    }
-                }
-            }
-            connector {
-                host = "0.0.0.0"
-                port = 7777
-            }
-        }
-        val server = embeddedServer(Netty, env).start()
-        try {
-            val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
-            snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
-            snsClient.publish(PublishRequest(testTopicArn, "message"))
-            Thread.sleep(200)
-            assertEquals("message", receivedMessage)
-        } finally {
-            server.stop(1, 2, TimeUnit.MILLISECONDS)
-        }
+    fun `should publish raw message to http endpoint`() = runBlocking {
+        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        val message = httpMessagesChannel.receive()
+        assertEquals("message", message)
     }
 
     @Test
@@ -206,11 +187,11 @@ internal class AwsSnsInterfaceTest {
 
         snsClient.publish(PublishRequest(testTopicArn, "message"))
 
-        Thread.sleep(200)
-        val receiveMessageResult = sqsClient.receiveMessage(testQueueUrl)
-        val message = receiveMessageResult.messages[0]
-        println(message.body)
-        assertTrue(message.body.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https://localhost:$port/SimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http://localhost:$port/\\?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:$region:$accountId:test-topic:[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\"}")))
+        val receiveMessageResult = sqsClient.receiveMessage(
+            ReceiveMessageRequest(testQueueUrl)
+                .withWaitTimeSeconds(2)
+        )
+        assertTrue(receiveMessageResult.messages[0].body.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https://localhost:$port/SimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http://localhost:$port/\\?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:$region:$accountId:test-topic:[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\"}")))
     }
 
     @Test
@@ -219,84 +200,53 @@ internal class AwsSnsInterfaceTest {
         snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
         snsClient.publish(PublishRequest(testTopicArn, "message"))
 
-        Thread.sleep(200)
-        val receiveMessageResult = sqsClient.receiveMessage(testQueueUrl)
-        val message = receiveMessageResult.messages[0]
-        assertEquals("message", message.body)
+        val receiveMessageResult = sqsClient.receiveMessage(
+            ReceiveMessageRequest(testQueueUrl)
+                .withWaitTimeSeconds(2)
+        )
+        assertEquals("message", receiveMessageResult.messages[0].body)
     }
 
     @Test
-    fun `should subscribe once for the same subscription request`() {
-        var messageReceivedCount = 0
-        val env = applicationEngineEnvironment {
-            module {
-                routing {
-                    route("/target") {
-                        post {
-                            messageReceivedCount++
-                        }
-                    }
-                }
-            }
-            connector {
-                host = "0.0.0.0"
-                port = 7777
-            }
-        }
-        val server = embeddedServer(Netty, env).start()
-        try {
-            val subscriptionResults = listOf(
-                snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
-                snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
-                snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
-            )
-            for (subscriptionResult in subscriptionResults) {
-                snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
-            }
+    fun `should subscribe once for the same subscription request`() = runBlocking {
 
-            snsClient.publish(PublishRequest(testTopicArn, "message"))
-            Thread.sleep(200)
-            assertEquals(1, messageReceivedCount)
-        } finally {
-            server.stop(1, 2, TimeUnit.MILLISECONDS)
+        val subscriptionResults = listOf(
+            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
+            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
+            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        )
+        for (subscriptionResult in subscriptionResults) {
+            snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
+        }
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
+
+        httpMessagesChannel.receive()
+        try {
+            withTimeout(50L) {
+                httpMessagesChannel.receive()
+                throw RuntimeException("More than one message delivered")
+            }
+        } catch (e: TimeoutCancellationException) {
         }
     }
 
     @Test
-    fun `should publish to multiple subscriptions`() {
-        var receivedMessage = ""
-        val env = applicationEngineEnvironment {
-            module {
-                routing {
-                    route("/target") {
-                        post {
-                            receivedMessage = call.receiveText()
-                        }
-                    }
-                }
-            }
-            connector {
-                host = "0.0.0.0"
-                port = 7777
-            }
+    fun `should publish to multiple subscriptions`() = runBlocking {
+        listOf(
+            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
+            snsClient.subscribe(testTopicArn, "sqs", testQueueUrl)
+        ).forEach {
+            snsClient.setSubscriptionAttributes(it.subscriptionArn, "RawMessageDelivery", "true")
         }
-        val server = embeddedServer(Netty, env).start()
-        try {
-            listOf(
-                snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
-                snsClient.subscribe(testTopicArn, "sqs", testQueueUrl)
-            ).forEach {
-                snsClient.setSubscriptionAttributes(it.subscriptionArn, "RawMessageDelivery", "true")
-            }
-            snsClient.publish(PublishRequest(testTopicArn, "message"))
-            Thread.sleep(200)
-            assertEquals("message", receivedMessage)
-            val receiveMessageResult = sqsClient.receiveMessage(testQueueUrl)
-            val message = receiveMessageResult.messages[0]
-            assertEquals("message", message.body)
-        } finally {
-            server.stop(1, 2, TimeUnit.MILLISECONDS)
-        }
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        val httpMessage = httpMessagesChannel.receive()
+        assertEquals("message", httpMessage)
+        val receiveMessageResult = sqsClient.receiveMessage(
+            ReceiveMessageRequest(testQueueUrl)
+                .withWaitTimeSeconds(2)
+        )
+        assertEquals("message", receiveMessageResult.messages[0].body)
+
     }
 
     @Test

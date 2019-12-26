@@ -1,6 +1,6 @@
 package com.gilbertojrequena.memsns.core.actor.dispatcher
 
-import com.gilbertojrequena.memsns.core.Config
+import com.gilbertojrequena.memsns.server.MemSnsConfig
 import com.gilbertojrequena.memsns.core.Subscription
 import com.gilbertojrequena.memsns.core.SubscriptionWithAttributes
 import io.mockk.every
@@ -12,8 +12,7 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class MessageFactoryTest {
-
-    private val config = Config(1234, "region", 123456789)
+    private val config = MemSnsConfig(1234, "region", 123456789)
     private val subscription = mockk<Subscription>()
     private lateinit var messageFactory: MessageFactory
 

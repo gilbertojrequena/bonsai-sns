@@ -1,9 +1,9 @@
 package com.gilbertojrequena.memsns.core.manager
 
-import com.gilbertojrequena.memsns.core.Config
 import com.gilbertojrequena.memsns.core.Topic
 import com.gilbertojrequena.memsns.core.actor.snsOpsActor
 import com.gilbertojrequena.memsns.core.exception.TopicNotFoundException
+import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.assertThrows
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class TopicManagerTest {
-    private val config = Config(1234, "region", 123456789)
+    private val config = MemSnsConfig(1234, "region", 123456789)
     private val topicManager = TopicManager(snsOpsActor(), config)
 
     @Test

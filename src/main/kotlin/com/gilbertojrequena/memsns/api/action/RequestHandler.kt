@@ -2,10 +2,10 @@ package com.gilbertojrequena.memsns.api.action
 
 import com.gilbertojrequena.memsns.api.action
 import com.gilbertojrequena.memsns.api.exception.ActionNotFoundException
-import com.gilbertojrequena.memsns.core.Config
 import com.gilbertojrequena.memsns.core.manager.PublicationManager
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import com.gilbertojrequena.memsns.core.manager.TopicManager
+import com.gilbertojrequena.memsns.server.MemSnsConfig
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 import io.ktor.request.receive
@@ -15,7 +15,7 @@ class RequestHandler(
     topicManager: TopicManager,
     subscriptionManager: SubscriptionManager,
     publicationManager: PublicationManager,
-    config: Config
+    config: MemSnsConfig
 ) {
     private val log = KotlinLogging.logger {}
     private val actions: Map<String, Action> = mapOf(

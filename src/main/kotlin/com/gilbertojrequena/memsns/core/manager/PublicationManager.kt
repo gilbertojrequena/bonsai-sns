@@ -2,7 +2,6 @@ package com.gilbertojrequena.memsns.core.manager
 
 import com.gilbertojrequena.memsns.core.PublishRequest
 import com.gilbertojrequena.memsns.core.actor.message.PublishMessage
-import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import kotlinx.coroutines.channels.SendChannel
 import java.util.*
 

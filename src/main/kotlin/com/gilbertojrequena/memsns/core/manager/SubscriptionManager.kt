@@ -2,10 +2,11 @@ package com.gilbertojrequena.memsns.core.manager
 
 import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
+import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 import java.lang.Integer.toHexString
 
-class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: Config) :
+class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: MemSnsConfig) :
     SqsOperationsManager(snsOpActor) {
 
     suspend fun create(subscription: Subscription): Subscription {

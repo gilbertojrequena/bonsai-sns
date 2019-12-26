@@ -1,10 +1,14 @@
 package com.gilbertojrequena.memsns.core.manager
 
-import com.gilbertojrequena.memsns.core.*
+import com.gilbertojrequena.memsns.core.Token
+import com.gilbertojrequena.memsns.core.Topic
+import com.gilbertojrequena.memsns.core.TopicArn
+import com.gilbertojrequena.memsns.core.TopicsAndToken
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
+import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 
-class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: Config) :
+class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: MemSnsConfig) :
     SqsOperationsManager(snsOpActor) {
 
     suspend fun create(topic: Topic): Topic {

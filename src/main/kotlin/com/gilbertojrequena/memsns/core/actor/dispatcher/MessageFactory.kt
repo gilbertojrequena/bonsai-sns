@@ -1,11 +1,11 @@
 package com.gilbertojrequena.memsns.core.actor.dispatcher
 
 import com.gilbertojrequena.memsns.api.ObjectMapper
-import com.gilbertojrequena.memsns.core.Config
 import com.gilbertojrequena.memsns.core.SubscriptionWithAttributes
+import com.gilbertojrequena.memsns.server.MemSnsConfig
 import java.net.URLEncoder
 
-class MessageFactory(private val config: Config) {
+class MessageFactory(private val config: MemSnsConfig) {
 
     fun create(
         text: String,
