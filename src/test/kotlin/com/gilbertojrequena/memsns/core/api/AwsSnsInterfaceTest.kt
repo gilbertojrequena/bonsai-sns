@@ -112,9 +112,9 @@ internal class AwsSnsInterfaceTest {
     @Test
     fun `should create subscription`() {
         val subscriptionResults = listOf(
-            snsClient.subscribe(testTopicArn, "http", "localhost:7777"),
-            snsClient.subscribe(testTopicArn, "https", "localhost:7777"),
-            snsClient.subscribe(testTopicArn, "sqs", "localhost:7777")
+            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777"),
+            snsClient.subscribe(testTopicArn, "https", "https://localhost:7777"),
+            snsClient.subscribe(testTopicArn, "sqs", "http://localhost:7777")
         )
         val listSubscriptionsResult = snsClient.listSubscriptions()
         for (subscriptionResult in subscriptionResults) {
@@ -126,9 +126,9 @@ internal class AwsSnsInterfaceTest {
     fun `should list subscription by topic`() {
         snsClient.createTopic("some-other-topic")
         val subscriptionResults = listOf(
-            snsClient.subscribe(testTopicArn, "http", "localhost:7777"),
-            snsClient.subscribe(testTopicArn, "https", "localhost:7777"),
-            snsClient.subscribe(testTopicArn, "sqs", "localhost:7777")
+            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777"),
+            snsClient.subscribe(testTopicArn, "https", "https://localhost:7777"),
+            snsClient.subscribe(testTopicArn, "sqs", "http://localhost:7777")
         )
         val listSubscriptionsResult = snsClient.listSubscriptionsByTopic(testTopicArn)
         for (subscriptionResult in subscriptionResults) {
@@ -138,7 +138,7 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should add subscription attributes`() {
-        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "localhost:7777")
+        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777")
         snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
 
         val subscriptionAttributesResult = snsClient.getSubscriptionAttributes(subscriptionResult.subscriptionArn)
@@ -148,7 +148,7 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should unsubscribe`() {
-        val subscription = snsClient.subscribe(testTopicArn, "http", "localhost:7777")
+        val subscription = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777")
 
         snsClient.unsubscribe(UnsubscribeRequest(subscription.subscriptionArn))
 

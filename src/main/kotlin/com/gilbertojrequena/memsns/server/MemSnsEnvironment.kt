@@ -32,7 +32,6 @@ internal fun Config.toSubscriptionDefinition(): Subscription {
     val subscriptionDefinition = Subscription.definition()
         .withEndpoint(this.getString("endpoint"))
         .withProtocol(this.getString("protocol"))
-        .withOwner(this.getString("owner"))
     attributes?.let { subscriptionDefinition.withAttributes(it as Map<String, String>) }
     return subscriptionDefinition
 }
@@ -103,8 +102,6 @@ class Subscription private constructor() {
     fun withEndpoint(endpoint: String): Subscription = apply { this.endpoint = endpoint }
 
     fun withProtocol(protocol: String): Subscription = apply { this.protocol = protocol }
-
-    fun withOwner(owner: String?): Subscription = apply { this.owner = owner }
 
     fun withAttributes(attributes: Attributes): Subscription = apply { this.attributes = attributes }
 

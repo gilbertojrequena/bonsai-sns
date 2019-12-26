@@ -1,7 +1,10 @@
 package com.gilbertojrequena.memsns.core.manager
 
 import com.gilbertojrequena.memsns.core.*
+import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTP
+import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTPS
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
+import com.gilbertojrequena.memsns.core.exception.EndpointProtocolMismatchException
 import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 import java.lang.Integer.toHexString
@@ -11,16 +14,27 @@ class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val co
 
     suspend fun create(subscription: Subscription): Subscription {
         val topic = findTopicByArn(subscription.topicArn)
-
+        validateEndpoint(subscription)
         return sendToActorAndReceive {
             SnsOpsMessage.SaveSubscription(
                 Subscription(
                     subscription.topicArn,
                     subscription.protocol,
                     subscription.endpoint,
-                    "owner",
+                    config.accountId.toString(),
                     "arn:aws:sns:${config.region}:${config.accountId}:${topic.name}:${buildSubscriptionHash(subscription)}"
                 ), it
+            )
+        }
+    }
+
+    private fun validateEndpoint(subscription: Subscription) {
+        if (setOf(HTTP, HTTPS).contains(subscription.protocol) &&
+            !subscription.endpoint.startsWith("${subscription.protocol.value}://")
+        ) {
+            throw EndpointProtocolMismatchException(
+                subscription.endpoint,
+                subscription.protocol.value
             )
         }
     }

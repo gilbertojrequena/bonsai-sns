@@ -3,6 +3,8 @@ package com.gilbertojrequena.memsns.api.action
 import com.gilbertojrequena.memsns.api.ObjectMapper.writeXmlElement
 import com.gilbertojrequena.memsns.api.awsMetadata
 import com.gilbertojrequena.memsns.api.createTopicSubscriptionData
+import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
+import com.gilbertojrequena.memsns.core.exception.EndpointProtocolMismatchException
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
@@ -16,7 +18,11 @@ class Subscribe(private val subscriptionManager: SubscriptionManager) :
     private val log = KotlinLogging.logger {}
 
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
-        val subscription = subscriptionManager.create(params.createTopicSubscriptionData())
+        val subscription = try {
+            subscriptionManager.create(params.createTopicSubscriptionData())
+        } catch (e: EndpointProtocolMismatchException) {
+            throw InvalidParameterException("Endpoint", "Endpoint must match the specified protocol")
+        }
         log.info { "Subscription $subscription created" }
         call.respondText {
             writeXmlElement(
