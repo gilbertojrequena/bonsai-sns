@@ -9,6 +9,7 @@ import com.gilbertojrequena.memsns.core.actor.dispatcher.MessageFactory
 import com.gilbertojrequena.memsns.core.actor.dispatcher.SqsMessageDispatcher
 import com.gilbertojrequena.memsns.core.actor.message.PublishMessage
 import com.gilbertojrequena.memsns.core.exception.MessageDispatcherNotFoundException
+import com.gilbertojrequena.memsns.core.filter_policy.FilterPolicyEvaluator
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 
 fun publishActor(
     subscriptionManager: SubscriptionManager,
@@ -36,7 +38,9 @@ private class MessageDispatchManager(
     snsHttpClient: SnsHttpClient
 ) {
 
+    private val log = KotlinLogging.logger {}
     private val publishScope = CoroutineScope(Dispatchers.IO)
+    private val messageFilterEvaluator = FilterPolicyEvaluator()
 
     private val dispatcherByProtocol = mapOf(
         Subscription.Protocol.HTTP to HttpMessageDispatcher(snsHttpClient),
@@ -50,21 +54,35 @@ private class MessageDispatchManager(
         do {
             val subsAndToken = subscriptionManager.findAllByTopicArn(publishRequest.topicArn)
             for (subscription in subsAndToken.subscriptions) {
-                val subscriptionAttributes = subscriptionManager.findSubscriptionAttributes(subscription.arn)
+                val attributes = subscriptionManager.findSubscriptionAttributes(subscription.arn)
                 publishScope.launch {
                     val messageDispatcher =
                         dispatcherByProtocol[subscription.protocol] ?: throw MessageDispatcherNotFoundException(
                             subscription.protocol
                         )
-
-                    val message = messageFactory.create(
-                        publishRequest.message,
-                        SubscriptionWithAttributes(subscription, subscriptionAttributes),
-                        publishRequest.messageId
-                    )
-                    messageDispatcher.dispatch(subscription.endpoint, message)
+                    val subscriptionPolicy = attributes["FilterPolicy"]
+                    if (subscriptionPolicy == null || messageIsAccepted(publishRequest, subscriptionPolicy)) {
+                        val message = messageFactory.create(
+                            publishRequest.message.body,
+                            SubscriptionWithAttributes(subscription, attributes),
+                            publishRequest.messageId
+                        )
+                        messageDispatcher.dispatch(subscription.endpoint, message)
+                    }
                 }
             }
         } while (subsAndToken.nextToken != null)
+    }
+
+    private fun messageIsAccepted(publishRequest: PublishRequest, policy: String): Boolean {
+        log.debug { "Should ${publishRequest.message} be accepted with policy: '$policy' ?" }
+        if (publishRequest.message.attributes.isEmpty()) {
+            log.debug { "Rejecting ${publishRequest.message} because of empty attributes" }
+            return false
+        }
+        return messageFilterEvaluator.eval(
+            publishRequest.message.attributes,
+            policy
+        )
     }
 }

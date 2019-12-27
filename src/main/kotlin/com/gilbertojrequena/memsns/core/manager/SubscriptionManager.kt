@@ -1,16 +1,21 @@
 package com.gilbertojrequena.memsns.core.manager
 
+import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
 import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTP
 import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTPS
+import com.gilbertojrequena.memsns.core.filter_policy.PolicyFilterValidator
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import com.gilbertojrequena.memsns.core.exception.EndpointProtocolMismatchException
+import com.gilbertojrequena.memsns.core.exception.InvalidFilterPolicyException
 import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 import java.lang.Integer.toHexString
 
 class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: MemSnsConfig) :
     SqsOperationsManager(snsOpActor) {
+
+    private val policyValidator = PolicyFilterValidator()
 
     suspend fun create(subscription: Subscription): Subscription {
         val topic = findTopicByArn(subscription.topicArn)
@@ -67,6 +72,13 @@ class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val co
         attributeName: String,
         attributeValue: String
     ): Attribute {
+        if (attributeName == "FilterPolicy") {
+            try {
+                policyValidator.validate(attributeValue)
+            } catch (e: InvalidFilterPolicyException) {
+                throw InvalidParameterException("FilterPolicy", e.message!!)
+            }
+        }
         return sendToActorAndReceive {
             SnsOpsMessage.SetSubscriptionAttribute(
                 arn, attributeName to attributeValue, it

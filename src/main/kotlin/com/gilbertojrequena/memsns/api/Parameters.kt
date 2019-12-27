@@ -1,6 +1,7 @@
 package com.gilbertojrequena.memsns.api
 
 import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
+import com.gilbertojrequena.memsns.core.Message
 import com.gilbertojrequena.memsns.core.PublishRequest
 import com.gilbertojrequena.memsns.core.Subscription
 import com.gilbertojrequena.memsns.core.Topic
@@ -20,8 +21,11 @@ fun Parameters.createTopicSubscriptionData(): Subscription = Subscription(
     Subscription.Protocol.fromName(this.validateAndGet("Protocol")), this.validateAndGet("Endpoint")
 )
 
-fun Parameters.createPublishRequest() =
-    PublishRequest(this.validateAndGet("TopicArn"), this.validateAndGet("Message", "Empty Message"))
+fun Parameters.createPublishRequest(): PublishRequest {
+    val messageAttributes = MessageAttributeParser.parse(this)
+    val message = Message(this.validateAndGet("Message", "Empty Message"), messageAttributes)
+    return PublishRequest(this.validateAndGet("TopicArn"), message)
+}
 
 fun Parameters.action(): String {
     return this.validateAndGet("Action")

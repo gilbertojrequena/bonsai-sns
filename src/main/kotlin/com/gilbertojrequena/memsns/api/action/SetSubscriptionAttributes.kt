@@ -13,7 +13,7 @@ import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 class SetSubscriptionAttributes(private val subscriptionManager: SubscriptionManager) : Action {
     companion object {
         private val SUPPORTED_ATTRIBUTES = setOf(
-            "DeliveryPolicy", "FilterPolicy ", "RawMessageDelivery", "RedrivePolicy"
+            "DeliveryPolicy", "FilterPolicy", "RawMessageDelivery", "RedrivePolicy"
         )
     }
 

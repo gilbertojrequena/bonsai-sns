@@ -16,9 +16,7 @@ class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: M
             SnsOpsMessage.SaveTopic(
                 Topic(
                     topic.name,
-                    buildArn(topic),
-                    topic.attributes,
-                    topic.tags
+                    buildArn(topic)
                 ), it
             )
         }

@@ -1,4 +1,4 @@
-package com.gilbertojrequena.memsns.core.api
+package com.gilbertojrequena.memsns.api
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
@@ -50,15 +50,23 @@ internal class AwsSnsInterfaceTest {
         @JvmStatic
         @BeforeAll
         fun setUp() {
-            server = MemSnsServer.builder().withRegion(region).withAccountId(accountId).withPort(port).start()
+            server = MemSnsServer.builder().withRegion(
+                region
+            ).withAccountId(accountId).withPort(
+                port
+            ).start()
             sQSRestServer = SQSRestServerBuilder.withPort(9325).withInterface("localhost").start()
             sqsClient = AmazonSQSAsyncClientBuilder.standard()
                 .withCredentials(AWSStaticCredentialsProvider(basicAWSCredentials))
-                .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://localhost:9325", region))
+                .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://localhost:9325",
+                    region
+                ))
                 .build()
             snsClient = AmazonSNSAsyncClientBuilder.standard()
                 .withCredentials(AWSStaticCredentialsProvider(basicAWSCredentials))
-                .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://localhost:$port", region))
+                .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://localhost:$port",
+                    region
+                ))
                 .build()
 
             val env = applicationEngineEnvironment {
@@ -103,7 +111,9 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should create topic`() {
-        assertEquals("arn:aws:sns:$region:$accountId:test-topic", testTopicArn)
+        assertEquals("arn:aws:sns:$region:$accountId:test-topic",
+            testTopicArn
+        )
 
         val listTopicsResult = snsClient.listTopics()
         assertNotNull(listTopicsResult.topics.find { it.topicArn == testTopicArn })
@@ -112,9 +122,12 @@ internal class AwsSnsInterfaceTest {
     @Test
     fun `should create subscription`() {
         val subscriptionResults = listOf(
-            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777"),
-            snsClient.subscribe(testTopicArn, "https", "https://localhost:7777"),
-            snsClient.subscribe(testTopicArn, "sqs", "http://localhost:7777")
+            snsClient.subscribe(
+                testTopicArn, "http", "http://localhost:7777"),
+            snsClient.subscribe(
+                testTopicArn, "https", "https://localhost:7777"),
+            snsClient.subscribe(
+                testTopicArn, "sqs", "http://localhost:7777")
         )
         val listSubscriptionsResult = snsClient.listSubscriptions()
         for (subscriptionResult in subscriptionResults) {
@@ -126,11 +139,16 @@ internal class AwsSnsInterfaceTest {
     fun `should list subscription by topic`() {
         snsClient.createTopic("some-other-topic")
         val subscriptionResults = listOf(
-            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777"),
-            snsClient.subscribe(testTopicArn, "https", "https://localhost:7777"),
-            snsClient.subscribe(testTopicArn, "sqs", "http://localhost:7777")
+            snsClient.subscribe(
+                testTopicArn, "http", "http://localhost:7777"),
+            snsClient.subscribe(
+                testTopicArn, "https", "https://localhost:7777"),
+            snsClient.subscribe(
+                testTopicArn, "sqs", "http://localhost:7777")
         )
-        val listSubscriptionsResult = snsClient.listSubscriptionsByTopic(testTopicArn)
+        val listSubscriptionsResult = snsClient.listSubscriptionsByTopic(
+            testTopicArn
+        )
         for (subscriptionResult in subscriptionResults) {
             assertNotNull(listSubscriptionsResult.subscriptions.find { it.subscriptionArn == subscriptionResult.subscriptionArn })
         }
@@ -138,7 +156,8 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should add subscription attributes`() {
-        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777")
+        val subscriptionResult = snsClient.subscribe(
+            testTopicArn, "http", "http://localhost:7777")
         snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
 
         val subscriptionAttributesResult = snsClient.getSubscriptionAttributes(subscriptionResult.subscriptionArn)
@@ -148,7 +167,8 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should unsubscribe`() {
-        val subscription = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777")
+        val subscription = snsClient.subscribe(
+            testTopicArn, "http", "http://localhost:7777")
 
         snsClient.unsubscribe(UnsubscribeRequest(subscription.subscriptionArn))
 
@@ -158,7 +178,9 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should delete topic`() {
-        snsClient.deleteTopic(testTopicArn)
+        snsClient.deleteTopic(
+            testTopicArn
+        )
 
         val listTopicsResult = snsClient.listTopics()
         assertTrue(listTopicsResult.topics.isEmpty())
@@ -166,26 +188,34 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should publish http message`() = runBlocking {
-        snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
-        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        snsClient.subscribe(
+            testTopicArn, "http", "http://localhost:7777/target")
+        snsClient.publish(PublishRequest(
+            testTopicArn, "message"))
         val message = httpMessagesChannel.receive()
         assertTrue(message.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https%3A%2F%2Flocalhost%3A$port%2FSimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http%3A%2F%2Flocalhost%3A$port%2F%3FAction%3DUnsubscribe%26SubscriptionArn%3Darn%3Aaws%3Asns%3A$region%3A$accountId%3Atest-topic%3A[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\"}")))
     }
 
     @Test
     fun `should publish raw message to http endpoint`() = runBlocking {
-        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        val subscriptionResult = snsClient.subscribe(
+            testTopicArn, "http", "http://localhost:7777/target")
         snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
-        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        snsClient.publish(PublishRequest(
+            testTopicArn, "message"))
         val message = httpMessagesChannel.receive()
         assertEquals("message", message)
     }
 
     @Test
     fun `should publish to sqs`() {
-        snsClient.subscribe(testTopicArn, "sqs", testQueueUrl)
+        snsClient.subscribe(
+            testTopicArn, "sqs",
+            testQueueUrl
+        )
 
-        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        snsClient.publish(PublishRequest(
+            testTopicArn, "message"))
 
         val receiveMessageResult = sqsClient.receiveMessage(
             ReceiveMessageRequest(testQueueUrl)
@@ -196,9 +226,13 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should publish raw message to sqs`() {
-        val subscriptionResult = snsClient.subscribe(testTopicArn, "sqs", testQueueUrl)
+        val subscriptionResult = snsClient.subscribe(
+            testTopicArn, "sqs",
+            testQueueUrl
+        )
         snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
-        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        snsClient.publish(PublishRequest(
+            testTopicArn, "message"))
 
         val receiveMessageResult = sqsClient.receiveMessage(
             ReceiveMessageRequest(testQueueUrl)
@@ -211,14 +245,18 @@ internal class AwsSnsInterfaceTest {
     fun `should subscribe once for the same subscription request`() = runBlocking {
 
         val subscriptionResults = listOf(
-            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
-            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
-            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+            snsClient.subscribe(
+                testTopicArn, "http", "http://localhost:7777/target"),
+            snsClient.subscribe(
+                testTopicArn, "http", "http://localhost:7777/target"),
+            snsClient.subscribe(
+                testTopicArn, "http", "http://localhost:7777/target")
         )
         for (subscriptionResult in subscriptionResults) {
             snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
         }
-        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        snsClient.publish(PublishRequest(
+            testTopicArn, "message"))
 
         httpMessagesChannel.receive()
         try {
@@ -233,12 +271,17 @@ internal class AwsSnsInterfaceTest {
     @Test
     fun `should publish to multiple subscriptions`() = runBlocking {
         listOf(
-            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target"),
-            snsClient.subscribe(testTopicArn, "sqs", testQueueUrl)
+            snsClient.subscribe(
+                testTopicArn, "http", "http://localhost:7777/target"),
+            snsClient.subscribe(
+                testTopicArn, "sqs",
+                testQueueUrl
+            )
         ).forEach {
             snsClient.setSubscriptionAttributes(it.subscriptionArn, "RawMessageDelivery", "true")
         }
-        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        snsClient.publish(PublishRequest(
+            testTopicArn, "message"))
         val httpMessage = httpMessagesChannel.receive()
         assertEquals("message", httpMessage)
         val receiveMessageResult = sqsClient.receiveMessage(
@@ -270,7 +313,8 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should respond successfully to ConfirmSubscription`() {
-        snsClient.confirmSubscription(testTopicArn, "token")
+        snsClient.confirmSubscription(
+            testTopicArn, "token")
     }
 
     @Test
@@ -304,7 +348,9 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should respond successfully to GetTopicAttributes`() {
-        snsClient.getTopicAttributes(GetTopicAttributesRequest(testTopicArn))
+        snsClient.getTopicAttributes(GetTopicAttributesRequest(
+            testTopicArn
+        ))
     }
 
     @Test
@@ -338,7 +384,8 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should respond successfully to RemovePermission`() {
-        snsClient.removePermission(RemovePermissionRequest(testTopicArn, "label"))
+        snsClient.removePermission(RemovePermissionRequest(
+            testTopicArn, "label"))
     }
 
     @Test
@@ -370,7 +417,8 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should respond successfully to SetTopicAttributes`() {
-        snsClient.setTopicAttributes(SetTopicAttributesRequest(testTopicArn, "key", "value"))
+        snsClient.setTopicAttributes(SetTopicAttributesRequest(
+            testTopicArn, "key", "value"))
     }
 
     @Test
@@ -384,6 +432,8 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should respond successfully to UntagResource`() {
-        snsClient.untagResource(UntagResourceRequest().withResourceArn(testTopicArn))
+        snsClient.untagResource(UntagResourceRequest().withResourceArn(
+            testTopicArn
+        ))
     }
 }

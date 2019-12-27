@@ -2,6 +2,7 @@ package com.gilbertojrequena.memsns.api
 
 import com.gilbertojrequena.memsns.api.action.RequestHandler
 import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
+import com.gilbertojrequena.memsns.api.exception.MessageAttributeValidationException
 import io.ktor.application.call
 import io.ktor.features.StatusPages
 import io.ktor.http.ContentType
@@ -46,6 +47,28 @@ inline fun <reified T> StatusPages.Configuration.invalidParameter() {
                         }
                         element("Message") {
                             text("InvalidParameter: ${cause.reason}")
+                        }
+                    }
+                    awsMetadata()
+                })
+        }
+    }
+}
+
+inline fun <reified T> StatusPages.Configuration.parameterValueInvalid() {
+    exception<MessageAttributeValidationException> { cause ->
+        call.respondText(contentType = ContentType.Application.Xml, status = HttpStatusCode.BadRequest) {
+            ObjectMapper.writeXmlElement(
+                jdom("ErrorResponse") {
+                    element("Error") {
+                        element("Type") {
+                            text("Sender")
+                        }
+                        element("Code") {
+                            text("ParameterValueInvalid")
+                        }
+                        element("Message") {
+                            text("${cause.message}")
                         }
                     }
                     awsMetadata()

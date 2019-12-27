@@ -3,7 +3,9 @@ package com.gilbertojrequena.memsns.server
 import com.gilbertojrequena.memsns.api.action.RequestHandler
 import com.gilbertojrequena.memsns.api.api
 import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
+import com.gilbertojrequena.memsns.api.exception.MessageAttributeValidationException
 import com.gilbertojrequena.memsns.api.invalidParameter
+import com.gilbertojrequena.memsns.api.parameterValueInvalid
 import com.gilbertojrequena.memsns.core.Subscription
 import com.gilbertojrequena.memsns.core.Topic
 import com.gilbertojrequena.memsns.core.actor.publishActor
@@ -54,6 +56,7 @@ class MemSnsServer(private val config: MemSnsConfig) {
             module {
                 install(StatusPages) {
                     invalidParameter<InvalidParameterException>()
+                    parameterValueInvalid<MessageAttributeValidationException>()
                 }
                 routing {
                     api(requestHandler)

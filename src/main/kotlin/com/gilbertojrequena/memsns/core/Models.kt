@@ -8,12 +8,8 @@ typealias Attributes = Map<String, String>
 
 data class Topic(
     val name: String,
-    val arn: String = "",
-    val attributes: List<Attribute> = listOf(),
-    val tags: Map<String, String> = mapOf()
-) {
-    data class Attribute(val key: String, val value: String)
-}
+    val arn: String = ""
+)
 
 data class Subscription(
     val topicArn: String,
@@ -40,8 +36,12 @@ data class Subscription(
 
 data class SubscriptionWithAttributes(val subscription: Subscription, val attributes: Attributes)
 
-data class PublishRequest(val topicArn: String, val message: String, val messageId: String = "")
+data class PublishRequest(val topicArn: String, val message: Message, val messageId: String = "")
 
 data class TopicsAndToken(val topics: List<Topic>, val nextToken: Token?)
 
 data class SubscriptionsAndToken(val subscriptions: List<Subscription>, val nextToken: String?)
+
+data class MessageAttribute(val type: String, val value: String)
+
+data class Message(val body: String, val attributes: Map<String, MessageAttribute> = mapOf())

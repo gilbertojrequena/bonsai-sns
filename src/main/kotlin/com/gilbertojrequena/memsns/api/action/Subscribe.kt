@@ -12,8 +12,7 @@ import io.ktor.response.respondText
 import mu.KotlinLogging
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class Subscribe(private val subscriptionManager: SubscriptionManager) :
-    Action {
+class Subscribe(private val subscriptionManager: SubscriptionManager) : Action {
 
     private val log = KotlinLogging.logger {}
 
