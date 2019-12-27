@@ -7,7 +7,7 @@ import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class AddPermission : Action {
+internal class AddPermission : Action {
 
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         call.respondText {

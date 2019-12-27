@@ -10,7 +10,7 @@ import io.ktor.response.respondText
 import mu.KotlinLogging
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class CreateTopic(private val topicManager: TopicManager) :
+internal class CreateTopic(private val topicManager: TopicManager) :
     Action {
     private val log = KotlinLogging.logger {}
 

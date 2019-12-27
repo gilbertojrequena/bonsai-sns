@@ -44,7 +44,7 @@ internal fun Config.getObjectOrNull(key: String): ConfigObject? {
     }
 }
 
-class MemSnsEnvironment private constructor() {
+public class MemSnsEnvironment private constructor() {
     companion object {
         fun definition(): MemSnsEnvironment {
             return MemSnsEnvironment()
@@ -63,7 +63,7 @@ class MemSnsEnvironment private constructor() {
 
 }
 
-class Topic private constructor() {
+public class Topic private constructor() {
     companion object {
         fun definition(): Topic {
             return Topic()
@@ -83,7 +83,7 @@ class Topic private constructor() {
         apply { this.subscriptions = subscriptions.toMutableList() }
 }
 
-class Subscription private constructor() {
+public class Subscription private constructor() {
 
     companion object {
         fun definition(): Subscription {

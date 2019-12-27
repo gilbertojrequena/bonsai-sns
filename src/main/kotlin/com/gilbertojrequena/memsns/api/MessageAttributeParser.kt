@@ -6,7 +6,7 @@ import com.gilbertojrequena.memsns.api.exception.MissingMessageAttributeValueExc
 import com.gilbertojrequena.memsns.core.MessageAttribute
 import io.ktor.http.Parameters
 
-class MessageAttributeParser {
+internal class MessageAttributeParser {
 
     companion object {
         fun parse(parameters: Parameters): Map<String, MessageAttribute> {

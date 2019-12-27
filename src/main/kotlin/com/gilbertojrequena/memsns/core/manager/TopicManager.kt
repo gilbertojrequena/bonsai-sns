@@ -8,7 +8,7 @@ import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 
-class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: MemSnsConfig) :
+internal class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: MemSnsConfig) :
     SqsOperationsManager(snsOpActor) {
 
     suspend fun create(topic: Topic): Topic {

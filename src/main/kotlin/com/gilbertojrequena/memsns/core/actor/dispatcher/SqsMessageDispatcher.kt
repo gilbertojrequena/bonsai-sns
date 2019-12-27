@@ -3,7 +3,7 @@ package com.gilbertojrequena.memsns.core.actor.dispatcher
 import com.gilbertojrequena.memsns.core.SnsHttpClient
 import mu.KotlinLogging
 
-class SqsMessageDispatcher(private val httpClient: SnsHttpClient) : MessageDispatcher {
+internal class SqsMessageDispatcher(private val httpClient: SnsHttpClient) : MessageDispatcher {
 
     private val log = KotlinLogging.logger { }
 

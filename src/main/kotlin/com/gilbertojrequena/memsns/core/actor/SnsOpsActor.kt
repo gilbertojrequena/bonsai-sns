@@ -11,7 +11,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.math.min
 
-fun snsOpsActor() = GlobalScope.actor<SnsOpsMessage> {
+internal fun snsOpsActor() = GlobalScope.actor<SnsOpsMessage> {
     with(Database()) {
         for (message in channel) {
             when (message) {

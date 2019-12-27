@@ -14,11 +14,11 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-fun HttpStatusCode.isRetriable(): Boolean {
+internal fun HttpStatusCode.isRetriable(): Boolean {
     return this.value > 499
 }
 
-fun Routing.api(requestHandler: RequestHandler) {
+internal fun Routing.api(requestHandler: RequestHandler) {
     snsApi(requestHandler)
 }
 
@@ -33,7 +33,7 @@ private fun Routing.snsApi(requestHandler: RequestHandler) {
     }
 }
 
-inline fun <reified T> StatusPages.Configuration.invalidParameter() {
+internal inline fun <reified T> StatusPages.Configuration.invalidParameter() {
     exception<InvalidParameterException> { cause ->
         call.respondText(contentType = ContentType.Application.Xml, status = HttpStatusCode.BadRequest) {
             ObjectMapper.writeXmlElement(
@@ -55,7 +55,7 @@ inline fun <reified T> StatusPages.Configuration.invalidParameter() {
     }
 }
 
-inline fun <reified T> StatusPages.Configuration.parameterValueInvalid() {
+internal inline fun <reified T> StatusPages.Configuration.parameterValueInvalid() {
     exception<MessageAttributeValidationException> { cause ->
         call.respondText(contentType = ContentType.Application.Xml, status = HttpStatusCode.BadRequest) {
             ObjectMapper.writeXmlElement(

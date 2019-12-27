@@ -5,7 +5,7 @@ import com.gilbertojrequena.memsns.core.actor.message.PublishMessage
 import kotlinx.coroutines.channels.SendChannel
 import java.util.*
 
-class PublicationManager(
+internal class PublicationManager(
     private val snsPublicationActor: SendChannel<PublishMessage>
 ) {
 

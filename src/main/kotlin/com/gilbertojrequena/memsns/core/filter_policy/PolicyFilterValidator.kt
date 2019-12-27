@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.gilbertojrequena.memsns.core.JsonMapper
 import com.gilbertojrequena.memsns.core.exception.InvalidFilterPolicyException
 
-class PolicyFilterValidator {
+internal class PolicyFilterValidator {
     private val jsonMapper = JsonMapper.instance()
 
     fun validate(policy: String) {

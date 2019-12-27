@@ -19,7 +19,7 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 
-fun publishActor(
+internal fun publishActor(
     subscriptionManager: SubscriptionManager,
     config: MemSnsConfig
 ) = GlobalScope.actor<PublishMessage> {
@@ -40,7 +40,7 @@ private class MessageDispatchManager(
 
     private val log = KotlinLogging.logger {}
     private val publishScope = CoroutineScope(Dispatchers.IO)
-    private val messageFilterEvaluator = FilterPolicyEvaluator()
+    private val filterPolicyEvaluator = FilterPolicyEvaluator()
 
     private val dispatcherByProtocol = mapOf(
         Subscription.Protocol.HTTP to HttpMessageDispatcher(snsHttpClient),
@@ -80,7 +80,7 @@ private class MessageDispatchManager(
             log.debug { "Rejecting ${publishRequest.message} because of empty attributes" }
             return false
         }
-        return messageFilterEvaluator.eval(
+        return filterPolicyEvaluator.eval(
             publishRequest.message.attributes,
             policy
         )

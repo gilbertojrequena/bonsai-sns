@@ -11,7 +11,7 @@ import io.ktor.response.respondText
 import mu.KotlinLogging
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class Unsubscribe(private val subscriptionManager: SubscriptionManager) : Action {
+internal class Unsubscribe(private val subscriptionManager: SubscriptionManager) : Action {
     private val log = KotlinLogging.logger {}
 
     override suspend fun execute(call: ApplicationCall, params: Parameters) {

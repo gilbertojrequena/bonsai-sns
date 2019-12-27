@@ -7,7 +7,7 @@ import com.gilbertojrequena.memsns.core.Subscription
 import com.gilbertojrequena.memsns.core.Topic
 import io.ktor.http.Parameters
 
-fun Parameters.validateAndGet(parameter: String, reason: String = parameter): String {
+internal fun Parameters.validateAndGet(parameter: String, reason: String = parameter): String {
     val value = this[parameter] ?: throw InvalidParameterException(parameter, reason)
     if (value.trim().isEmpty()) {
         throw InvalidParameterException(parameter, reason)
@@ -15,18 +15,18 @@ fun Parameters.validateAndGet(parameter: String, reason: String = parameter): St
     return value
 }
 
-fun Parameters.createTopicData(): Topic = Topic(this.validateAndGet("Name", "Topic Name"))
-fun Parameters.createTopicSubscriptionData(): Subscription = Subscription(
+internal fun Parameters.createTopicData(): Topic = Topic(this.validateAndGet("Name", "Topic Name"))
+internal fun Parameters.createTopicSubscriptionData(): Subscription = Subscription(
     this.validateAndGet("TopicArn"),
     Subscription.Protocol.fromName(this.validateAndGet("Protocol")), this.validateAndGet("Endpoint")
 )
 
-fun Parameters.createPublishRequest(): PublishRequest {
+internal fun Parameters.createPublishRequest(): PublishRequest {
     val messageAttributes = MessageAttributeParser.parse(this)
     val message = Message(this.validateAndGet("Message", "Empty Message"), messageAttributes)
     return PublishRequest(this.validateAndGet("TopicArn"), message)
 }
 
-fun Parameters.action(): String {
+internal fun Parameters.action(): String {
     return this.validateAndGet("Action")
 }

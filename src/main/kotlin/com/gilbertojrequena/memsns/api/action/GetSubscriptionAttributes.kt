@@ -9,7 +9,7 @@ import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class GetSubscriptionAttributes(private val subscriptionManager: SubscriptionManager) : Action {
+internal class GetSubscriptionAttributes(private val subscriptionManager: SubscriptionManager) : Action {
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         val attributes =
             subscriptionManager.findSubscriptionAttributes(params.validateAndGet("SubscriptionArn"))

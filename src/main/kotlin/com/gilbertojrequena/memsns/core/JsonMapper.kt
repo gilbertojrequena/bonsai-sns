@@ -3,7 +3,7 @@ package com.gilbertojrequena.memsns.core
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 
-class JsonMapper private constructor() {
+internal class JsonMapper private constructor() {
     private val objectMapper = ObjectMapper()
 
     companion object {

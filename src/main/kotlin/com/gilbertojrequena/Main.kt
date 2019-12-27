@@ -8,7 +8,7 @@ fun main(args: Array<String>) {
         .start()
 }
 
-fun String.splitToPair(c: Char): Pair<String, String>? = this.indexOf(c).let { index ->
+private fun String.splitToPair(c: Char): Pair<String, String>? = this.indexOf(c).let { index ->
     return when (index) {
         -1 -> null
         else -> Pair(take(index), drop(index + 1))

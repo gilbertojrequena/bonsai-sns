@@ -8,7 +8,7 @@ import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class ConfirmSubscription(private val config: MemSnsConfig) : Action {
+internal class ConfirmSubscription(private val config: MemSnsConfig) : Action {
 
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         call.respondText {

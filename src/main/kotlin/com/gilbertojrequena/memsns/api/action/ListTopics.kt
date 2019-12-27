@@ -8,7 +8,7 @@ import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class ListTopics(private val topicManager: TopicManager) :
+internal class ListTopics(private val topicManager: TopicManager) :
     Action {
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         val topicsAndToken = topicManager.findAll(params["NextToken"])

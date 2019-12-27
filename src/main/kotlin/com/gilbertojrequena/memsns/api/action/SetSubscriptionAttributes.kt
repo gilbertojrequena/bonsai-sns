@@ -10,7 +10,7 @@ import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class SetSubscriptionAttributes(private val subscriptionManager: SubscriptionManager) : Action {
+internal class SetSubscriptionAttributes(private val subscriptionManager: SubscriptionManager) : Action {
     companion object {
         private val SUPPORTED_ATTRIBUTES = setOf(
             "DeliveryPolicy", "FilterPolicy", "RawMessageDelivery", "RedrivePolicy"

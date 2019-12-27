@@ -3,7 +3,7 @@ package com.gilbertojrequena.memsns.core.actor.message
 import com.gilbertojrequena.memsns.core.*
 import kotlinx.coroutines.channels.SendChannel
 
-sealed class SnsOpsMessage {
+internal sealed class SnsOpsMessage {
     class SaveTopic(val topic: Topic, val response: SendChannel<Topic>) : SnsOpsMessage()
     class FindAllTopics(val fromToken: Token? = null, val response: SendChannel<TopicsAndToken>) :
         SnsOpsMessage()

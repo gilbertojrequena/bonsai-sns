@@ -11,7 +11,7 @@ import io.ktor.response.respondText
 import mu.KotlinLogging
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class DeleteTopic(private val topicManager: TopicManager) : Action {
+internal class DeleteTopic(private val topicManager: TopicManager) : Action {
     private val log = KotlinLogging.logger {}
 
     override suspend fun execute(call: ApplicationCall, params: Parameters) {

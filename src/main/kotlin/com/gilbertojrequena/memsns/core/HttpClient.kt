@@ -9,7 +9,7 @@ import io.ktor.client.response.HttpResponse
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 
-class SnsHttpClient {
+internal class SnsHttpClient {
     companion object {
         private const val RETRY_DELAY = 1000L
     }

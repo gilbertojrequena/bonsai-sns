@@ -9,7 +9,7 @@ import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class ListSubscriptionsByTopic(private val subscriptionManager: SubscriptionManager) :
+internal class ListSubscriptionsByTopic(private val subscriptionManager: SubscriptionManager) :
     Action {
     override suspend fun execute(call: ApplicationCall, params: Parameters) {
         val subscriptionsAndToken =

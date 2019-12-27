@@ -1,3 +1,3 @@
 package com.gilbertojrequena.memsns.core.exception
 
-class HttpCallRetriableException : RuntimeException()
+internal class HttpCallRetriableException : RuntimeException()

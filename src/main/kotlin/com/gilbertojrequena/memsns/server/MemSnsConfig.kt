@@ -3,7 +3,7 @@ package com.gilbertojrequena.memsns.server
 import com.typesafe.config.ConfigException
 import com.typesafe.config.ConfigFactory
 
-class MemSnsConfig(
+public class MemSnsConfig(
     internal var port: Int? = null,
     internal var region: String? = null,
     internal var accountId: Long? = null,

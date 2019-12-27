@@ -4,7 +4,7 @@ import com.gilbertojrequena.memsns.core.JsonMapper
 import com.gilbertojrequena.memsns.core.MessageAttribute
 import mu.KotlinLogging
 
-class FilterPolicyEvaluator {
+internal class FilterPolicyEvaluator {
 
     private val log = KotlinLogging.logger {}
     private val jsonMapper = JsonMapper.instance()

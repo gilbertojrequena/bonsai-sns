@@ -12,7 +12,7 @@ import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 import java.lang.Integer.toHexString
 
-class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: MemSnsConfig) :
+internal class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: MemSnsConfig) :
     SqsOperationsManager(snsOpActor) {
 
     private val policyValidator = PolicyFilterValidator()

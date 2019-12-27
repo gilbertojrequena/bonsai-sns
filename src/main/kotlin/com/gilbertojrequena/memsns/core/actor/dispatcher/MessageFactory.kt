@@ -5,7 +5,7 @@ import com.gilbertojrequena.memsns.core.SubscriptionWithAttributes
 import com.gilbertojrequena.memsns.server.MemSnsConfig
 import java.net.URLEncoder
 
-class MessageFactory(private val config: MemSnsConfig) {
+internal class MessageFactory(private val config: MemSnsConfig) {
 
     fun create(
         text: String,

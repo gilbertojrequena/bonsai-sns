@@ -1,24 +1,24 @@
 package com.gilbertojrequena.memsns.core
 
-typealias TopicArn = String
-typealias SubscriptionArn = String
-typealias Token = String
-typealias Attribute = Pair<String, String>
-typealias Attributes = Map<String, String>
+internal typealias TopicArn = String
+internal typealias SubscriptionArn = String
+internal typealias Token = String
+internal typealias Attribute = Pair<String, String>
+internal typealias Attributes = Map<String, String>
 
-data class Topic(
+internal data class Topic(
     val name: String,
     val arn: String = ""
 )
 
-data class Subscription(
+internal data class Subscription(
     val topicArn: String,
     val protocol: Protocol,
     val endpoint: String,
     val owner: String = "",
     val arn: String = ""
 ) {
-    enum class Protocol(val value: String) {
+    internal enum class Protocol(val value: String) {
         HTTP("http"),
         HTTPS("https"),
         EMAIL("email"),
@@ -34,14 +34,14 @@ data class Subscription(
     }
 }
 
-data class SubscriptionWithAttributes(val subscription: Subscription, val attributes: Attributes)
+internal data class SubscriptionWithAttributes(val subscription: Subscription, val attributes: Attributes)
 
-data class PublishRequest(val topicArn: String, val message: Message, val messageId: String = "")
+internal data class PublishRequest(val topicArn: String, val message: Message, val messageId: String = "")
 
-data class TopicsAndToken(val topics: List<Topic>, val nextToken: Token?)
+internal data class TopicsAndToken(val topics: List<Topic>, val nextToken: Token?)
 
-data class SubscriptionsAndToken(val subscriptions: List<Subscription>, val nextToken: String?)
+internal data class SubscriptionsAndToken(val subscriptions: List<Subscription>, val nextToken: String?)
 
-data class MessageAttribute(val type: String, val value: String)
+internal data class MessageAttribute(val type: String, val value: String)
 
-data class Message(val body: String, val attributes: Map<String, MessageAttribute> = mapOf())
+internal data class Message(val body: String, val attributes: Map<String, MessageAttribute> = mapOf())

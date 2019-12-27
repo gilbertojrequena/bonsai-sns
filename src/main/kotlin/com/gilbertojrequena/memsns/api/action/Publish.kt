@@ -10,7 +10,7 @@ import io.ktor.response.respondText
 import mu.KotlinLogging
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-class Publish(private val publicationManager: PublicationManager) :
+internal class Publish(private val publicationManager: PublicationManager) :
     Action {
     private val log = KotlinLogging.logger {}
 

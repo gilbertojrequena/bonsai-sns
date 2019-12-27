@@ -8,7 +8,7 @@ import org.jdom2.output.XMLOutputter
 import org.jonnyzzz.kotlin.xml.dsl.XWriter
 
 
-object ObjectMapper {
+internal object ObjectMapper {
     private val xmlMapper = XMLOutputter()
     private val jsonMapper = ObjectMapper()
     fun writeXmlElement(element: Element): String = xmlMapper.outputString(element)
@@ -22,7 +22,7 @@ object ObjectMapper {
     fun jsonArrayBuilder(): ArrayNode = jsonMapper.createArrayNode()
 }
 
-fun XWriter.awsMetadata(requestId: String = "00000000-0000-0000-0000-000000000000") {
+internal fun XWriter.awsMetadata(requestId: String = "00000000-0000-0000-0000-000000000000") {
     element("ResponseMetadata") {
         element("RequestId") {
             text(requestId)

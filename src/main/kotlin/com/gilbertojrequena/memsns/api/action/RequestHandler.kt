@@ -11,7 +11,7 @@ import io.ktor.http.Parameters
 import io.ktor.request.receive
 import mu.KotlinLogging
 
-class RequestHandler(
+internal class RequestHandler(
     topicManager: TopicManager,
     subscriptionManager: SubscriptionManager,
     publicationManager: PublicationManager,
