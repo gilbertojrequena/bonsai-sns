@@ -86,10 +86,10 @@ class BonsaiSnsServer(private val config: BonsaiSnsConfig) {
     ) {
         GlobalScope.launch {
             config.bonsaiSnsEnvironment.let { envDefinition ->
-                log.debug { "Initializing environment" }
+                log.info { "Initializing environment" }
                 envDefinition?.topics?.forEach { topicDefinition ->
                     val topic = topicManager.create(Topic(topicDefinition.name))
-                    log.debug { "$topic created" }
+                    log.info { "$topic created" }
                     topicDefinition.subscriptions.forEach { subscriptionDefinition ->
                         val subscription = subscriptionManager.create(
                             Subscription(
@@ -97,15 +97,15 @@ class BonsaiSnsServer(private val config: BonsaiSnsConfig) {
                                 subscriptionDefinition.endpoint, subscriptionDefinition.owner ?: ""
                             )
                         )
-                        log.debug { "$subscription added to $topic" }
+                        log.info { "$subscription added to $topic" }
                         subscriptionDefinition.attributes.forEach {
                             subscriptionManager.setSubscriptionAttribute(subscription.arn, it.key, it.value)
-                            log.debug { "Attribute '${it.key}'='${it.value}' added to subscription $subscription" }
+                            log.info { "Attribute '${it.key}'='${it.value}' added to subscription $subscription" }
                         }
                     }
                 }
             }
-            log.debug { "Environment initialization finished" }
+            log.info { "Environment initialization finished" }
         }
     }
 

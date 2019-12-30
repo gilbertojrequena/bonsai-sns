@@ -103,6 +103,11 @@ private class MessageDispatchManager(
                                                 ", dlq arn: '$dlqArn'"
                                     }
                                 }
+                            } else {
+                                log.debug {
+                                    "Message will be lost, there is no dlq configured for subscription, " +
+                                            "endpoint: ${subscription.endpoint}, message: '$message', subscription: $subscription"
+                                }
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-package com.gilbertojrequena
+package com.gilbertojrequena.bonsai_sns
 
 import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsServer
