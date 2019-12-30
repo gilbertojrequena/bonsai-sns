@@ -1,10 +1,10 @@
 package com.gilbertojrequena
 
-import com.gilbertojrequena.memsns.server.MemSnsConfig
-import com.gilbertojrequena.memsns.server.MemSnsServer
+import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsServer
 
 fun main(args: Array<String>) {
-    MemSnsServer(configFromArgs(args))
+    BonsaiSnsServer(configFromArgs(args))
         .start()
 }
 
@@ -15,14 +15,14 @@ private fun String.splitToPair(c: Char): Pair<String, String>? = this.indexOf(c)
     }
 }
 
-private fun configFromArgs(args: Array<String>): MemSnsConfig {
+private fun configFromArgs(args: Array<String>): BonsaiSnsConfig {
     val argsMap = args.mapNotNull { it.splitToPair('=') }.toMap()
-    return MemSnsConfig(
-        port = argsMap["mem-sns.port"]?.toInt(),
-        region = argsMap["mem-sns.region"],
-        accountId = argsMap["mem-sns.accountId"]?.toLong(),
-        sqsEndpoint = argsMap["mem-sns.sqsEndpoint"],
-        sqsAccessKey = argsMap["mem-sns.sqsAccessKey"],
-        sqsSecretKey = argsMap["mem-sns.sqsSecretKey"]
+    return BonsaiSnsConfig(
+        port = argsMap["bonsai-sns.port"]?.toInt(),
+        region = argsMap["bonsai-sns.region"],
+        accountId = argsMap["bonsai-sns.accountId"]?.toLong(),
+        sqsEndpoint = argsMap["bonsai-sns.sqsEndpoint"],
+        sqsAccessKey = argsMap["bonsai-sns.sqsAccessKey"],
+        sqsSecretKey = argsMap["bonsai-sns.sqsSecretKey"]
     )
 }
