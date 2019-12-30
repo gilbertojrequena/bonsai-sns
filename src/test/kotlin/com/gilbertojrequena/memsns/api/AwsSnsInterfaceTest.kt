@@ -10,6 +10,7 @@ import com.amazonaws.services.sns.model.Tag
 import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
+import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.gilbertojrequena.memsns.server.MemSnsServer
 import io.ktor.application.call
@@ -42,6 +43,8 @@ internal class AwsSnsInterfaceTest {
         private lateinit var testTopicArn: String
         private lateinit var testQueueUrl: String
         private lateinit var testQueueArn: String
+        private lateinit var testDlqUrl: String
+        private lateinit var testDlqArn: String
         private lateinit var httpServer: ApplicationEngine
         private val httpMessagesChannel = Channel<String>()
         private val basicAWSCredentials = BasicAWSCredentials("foo", "bar")
@@ -108,6 +111,12 @@ internal class AwsSnsInterfaceTest {
         testQueueUrl = sqsClient.createQueue("test-queue").queueUrl
         testQueueArn = sqsClient.getQueueAttributes(
             GetQueueAttributesRequest(testQueueUrl)
+                .withAttributeNames("QueueArn")
+        ).attributes["QueueArn"]!!
+
+        testDlqUrl = sqsClient.createQueue("test-dlq").queueUrl
+        testDlqArn = sqsClient.getQueueAttributes(
+            GetQueueAttributesRequest(testDlqUrl)
                 .withAttributeNames("QueueArn")
         ).attributes["QueueArn"]!!
     }
@@ -290,11 +299,9 @@ internal class AwsSnsInterfaceTest {
 
         snsClient.publish(PublishRequest(testTopicArn, "message"))
 
-        val receiveMessageResult = sqsClient.receiveMessage(
-            ReceiveMessageRequest(testQueueUrl)
-                .withWaitTimeSeconds(2)
-        )
-        assertNotNull(receiveMessageResult.messages[0])
+        val message = getMessageFromQueue(testQueueUrl)
+
+        assertNotNull(message)
     }
 
     @Test
@@ -307,11 +314,8 @@ internal class AwsSnsInterfaceTest {
             )
         )
 
-        val receiveMessageResult = sqsClient.receiveMessage(
-            ReceiveMessageRequest(testQueueUrl)
-                .withWaitTimeSeconds(2)
-        )
-        assertEquals("message", receiveMessageResult.messages[0].body)
+        val message = getMessageFromQueue(testQueueUrl)
+        assertEquals("message", message.body)
     }
 
     @Test
@@ -325,11 +329,7 @@ internal class AwsSnsInterfaceTest {
         for (subscriptionResult in subscriptionResults) {
             snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
         }
-        snsClient.publish(
-            PublishRequest(
-                testTopicArn, "message"
-            )
-        )
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
 
         httpMessagesChannel.receive()
         try {
@@ -353,11 +353,31 @@ internal class AwsSnsInterfaceTest {
 
         val httpMessage = httpMessagesChannel.receive()
         assertEquals("message", httpMessage)
-        val receiveMessageResult = sqsClient.receiveMessage(
-            ReceiveMessageRequest(testQueueUrl)
-                .withWaitTimeSeconds(2)
-        )
-        assertEquals("message", receiveMessageResult.messages[0].body)
+        val message = getMessageFromQueue(testQueueUrl)
+        assertEquals("message", message.body)
+    }
+
+
+    @Test
+    fun `should send failed message to dead letter queue`() = runBlocking {
+        listOf(
+            snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target-nope"),
+            snsClient.subscribe(testTopicArn, "sqs", "$testQueueArn-nope")
+        ).forEach {
+            snsClient.setSubscriptionAttributes(it.subscriptionArn, "RawMessageDelivery", "true")
+            snsClient.setSubscriptionAttributes(
+                SetSubscriptionAttributesRequest()
+                    .withAttributeName("RedrivePolicy")
+                    .withAttributeValue("""{"deadLetterTargetArn": "$testDlqArn"}""")
+                    .withSubscriptionArn(it.subscriptionArn)
+            )
+        }
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
+
+        repeat(2) {
+            val message = getMessageFromQueue(testDlqUrl)
+            assertEquals("message", message.body)
+        }
     }
 
     @Test
@@ -496,5 +516,13 @@ internal class AwsSnsInterfaceTest {
                 testTopicArn
             )
         )
+    }
+
+    private fun getMessageFromQueue(queueUrl: String): Message {
+        return sqsClient.receiveMessage(
+            ReceiveMessageRequest(queueUrl)
+                .withWaitTimeSeconds(2)
+                .withMaxNumberOfMessages(1)
+        ).messages[0]
     }
 }

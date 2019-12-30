@@ -1,12 +1,12 @@
 package com.gilbertojrequena.memsns.core.manager
 
-import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
+import com.fasterxml.jackson.core.JsonParseException
 import com.gilbertojrequena.memsns.core.*
 import com.gilbertojrequena.memsns.core.Subscription.Protocol.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import com.gilbertojrequena.memsns.core.exception.EndpointProtocolMismatchException
-import com.gilbertojrequena.memsns.core.exception.InvalidFilterPolicyException
 import com.gilbertojrequena.memsns.core.exception.InvalidQueueArnException
+import com.gilbertojrequena.memsns.core.exception.InvalidRedrivePolicyException
 import com.gilbertojrequena.memsns.core.filter_policy.PolicyFilterValidator
 import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
@@ -43,18 +43,8 @@ internal class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, priva
                     )
                 }
             }
-            SQS -> {
-                if (!subscription.endpoint.matches(Regex("arn:aws:sqs:[a-z0-9-]+:\\d+:[a-zA-Z0-9-_]+$"))) {
-                    throw InvalidQueueArnException(subscription.endpoint)
-                }
-            }
+            SQS -> validateQueueArn(subscription.endpoint)
         }
-    }
-
-    private fun buildSubscriptionHash(subscription: Subscription): String {
-        return "${toHexString(subscription.topicArn.hashCode())}-${toHexString(subscription.protocol.hashCode())}-${toHexString(
-            subscription.endpoint.hashCode()
-        )}"
     }
 
     suspend fun findAll(nextToken: Token? = null): SubscriptionsAndToken {
@@ -80,10 +70,13 @@ internal class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, priva
         attributeValue: String
     ): Attribute {
         if (attributeName == "FilterPolicy") {
+            policyValidator.validate(attributeValue)
+        } else if (attributeName == "RedrivePolicy") {
             try {
-                policyValidator.validate(attributeValue)
-            } catch (e: InvalidFilterPolicyException) {
-                throw InvalidParameterException("FilterPolicy", e.message!!)
+                val dlqArn = JsonMapper.instance().read(attributeValue).get("deadLetterTargetArn").textValue()
+                validateQueueArn(dlqArn)
+            } catch (e: JsonParseException) {
+                throw InvalidRedrivePolicyException(e.message!!)
             }
         }
         return sendToActorAndReceive {
@@ -101,5 +94,17 @@ internal class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, priva
 
     private suspend fun findTopicByArn(topicArn: TopicArn): Topic {
         return sendToActorAndReceive { SnsOpsMessage.FindTopicByArn(topicArn, it) }
+    }
+
+    private fun validateQueueArn(arn: String) {
+        if (!arn.matches(Regex("arn:aws:sqs:[a-z0-9-]+:\\d+:[a-zA-Z0-9-_]+$"))) {
+            throw InvalidQueueArnException(arn)
+        }
+    }
+
+    private fun buildSubscriptionHash(subscription: Subscription): String {
+        return "${toHexString(subscription.topicArn.hashCode())}-${toHexString(subscription.protocol.hashCode())}-${toHexString(
+            subscription.endpoint.hashCode()
+        )}"
     }
 }

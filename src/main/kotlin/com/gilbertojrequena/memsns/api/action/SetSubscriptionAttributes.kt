@@ -4,6 +4,9 @@ import com.gilbertojrequena.memsns.api.ObjectMapper
 import com.gilbertojrequena.memsns.api.awsMetadata
 import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
 import com.gilbertojrequena.memsns.api.validateAndGet
+import com.gilbertojrequena.memsns.core.exception.InvalidFilterPolicyException
+import com.gilbertojrequena.memsns.core.exception.InvalidQueueArnException
+import com.gilbertojrequena.memsns.core.exception.InvalidRedrivePolicyException
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
@@ -26,7 +29,15 @@ internal class SetSubscriptionAttributes(private val subscriptionManager: Subscr
             it
         }
         val attributeValue = params.validateAndGet("AttributeValue")
-        subscriptionManager.setSubscriptionAttribute(subscriptionArn, attributeName, attributeValue)
+        try {
+            subscriptionManager.setSubscriptionAttribute(subscriptionArn, attributeName, attributeValue)
+        } catch (e: InvalidQueueArnException) {
+            throw InvalidParameterException("QueueArn", "SQS endpoint ARN")
+        } catch (e: InvalidFilterPolicyException) {
+            throw InvalidParameterException("FilterPolicy", e.message!!)
+        } catch (e: InvalidRedrivePolicyException) {
+            throw InvalidParameterException("RedrivePolicy", e.message!!)
+        }
         call.respondText {
             ObjectMapper.writeXmlElement(
                 jdom("SetSubscriptionAttributesResponse") {
