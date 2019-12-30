@@ -213,6 +213,78 @@ internal class AwsSnsInterfaceTest {
     }
 
     @Test
+    fun `should filter message with no attributes`() = runBlocking {
+        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
+        snsClient.setSubscriptionAttributes(
+            SetSubscriptionAttributesRequest()
+                .withAttributeName("FilterPolicy")
+                .withAttributeValue("""{"a": [{"numeric": [">", 0] }]}""")
+                .withAttributeValue("""{"b": [{"anything-but": ["rugby", "tennis"]}]}""")
+                .withSubscriptionArn(subscriptionResult.subscriptionArn)
+        )
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
+        try {
+            withTimeout(50L) {
+                httpMessagesChannel.receive()
+                throw RuntimeException("Message was received")
+            }
+        } catch (e: TimeoutCancellationException) {
+        }
+    }
+
+    @Test
+    fun `should filter message because of filter policy`() = runBlocking {
+        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
+        snsClient.setSubscriptionAttributes(
+            SetSubscriptionAttributesRequest()
+                .withAttributeName("FilterPolicy")
+                .withAttributeValue("""{"a": [{"numeric": [">", 0] }]}""")
+                .withAttributeValue("""{"b": [{"anything-but": ["rugby", "tennis"]}]}""")
+                .withSubscriptionArn(subscriptionResult.subscriptionArn)
+        )
+        snsClient.publish(
+            PublishRequest(testTopicArn, "message").withMessageAttributes(
+                mapOf<String, MessageAttributeValue>(
+                    "a" to MessageAttributeValue().withDataType("Number").withStringValue("-1")
+                )
+            )
+        )
+        try {
+            withTimeout(50L) {
+                httpMessagesChannel.receive()
+                throw RuntimeException("Message was received")
+            }
+        } catch (e: TimeoutCancellationException) {
+        }
+    }
+
+    @Test
+    fun `should accept message because of filter policy`() = runBlocking {
+        val subscriptionResult = snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
+        snsClient.setSubscriptionAttributes(
+            SetSubscriptionAttributesRequest()
+                .withAttributeName("FilterPolicy")
+                .withAttributeValue("""{"a": [{"numeric": [">", 0] }]}""")
+                .withAttributeValue("""{"b": [{"anything-but": ["rugby", "tennis"]}]}""")
+                .withSubscriptionArn(subscriptionResult.subscriptionArn)
+        )
+        snsClient.publish(
+            PublishRequest(testTopicArn, "message").withMessageAttributes(
+                mapOf<String, MessageAttributeValue>(
+                    "a" to MessageAttributeValue().withDataType("Number").withStringValue("10"),
+                    "b" to MessageAttributeValue().withDataType("String").withStringValue("<3 dogs")
+                )
+            )
+        )
+
+        val message = httpMessagesChannel.receive()
+        assertEquals("message", message)
+    }
+
+    @Test
     fun `should publish to sqs`() {
         snsClient.subscribe(testTopicArn, "sqs", testQueueArn)
 
@@ -277,11 +349,8 @@ internal class AwsSnsInterfaceTest {
         ).forEach {
             snsClient.setSubscriptionAttributes(it.subscriptionArn, "RawMessageDelivery", "true")
         }
-        snsClient.publish(
-            PublishRequest(
-                testTopicArn, "message"
-            )
-        )
+        snsClient.publish(PublishRequest(testTopicArn, "message"))
+
         val httpMessage = httpMessagesChannel.receive()
         assertEquals("message", httpMessage)
         val receiveMessageResult = sqsClient.receiveMessage(
@@ -289,7 +358,6 @@ internal class AwsSnsInterfaceTest {
                 .withWaitTimeSeconds(2)
         )
         assertEquals("message", receiveMessageResult.messages[0].body)
-
     }
 
     @Test
@@ -334,9 +402,7 @@ internal class AwsSnsInterfaceTest {
     @Test
     fun `should respond successfully to GetPlatformApplicationAttributes`() {
         snsClient.getPlatformApplicationAttributes(
-            GetPlatformApplicationAttributesRequest().withPlatformApplicationArn(
-                "arn"
-            )
+            GetPlatformApplicationAttributesRequest().withPlatformApplicationArn("arn")
         )
     }
 
@@ -347,11 +413,7 @@ internal class AwsSnsInterfaceTest {
 
     @Test
     fun `should respond successfully to GetTopicAttributes`() {
-        snsClient.getTopicAttributes(
-            GetTopicAttributesRequest(
-                testTopicArn
-            )
-        )
+        snsClient.getTopicAttributes(GetTopicAttributesRequest(testTopicArn))
     }
 
     @Test
