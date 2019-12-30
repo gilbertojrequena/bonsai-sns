@@ -2,12 +2,12 @@ package com.gilbertojrequena.memsns.core.manager
 
 import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
 import com.gilbertojrequena.memsns.core.*
-import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTP
-import com.gilbertojrequena.memsns.core.Subscription.Protocol.HTTPS
-import com.gilbertojrequena.memsns.core.filter_policy.PolicyFilterValidator
+import com.gilbertojrequena.memsns.core.Subscription.Protocol.*
 import com.gilbertojrequena.memsns.core.actor.message.SnsOpsMessage
 import com.gilbertojrequena.memsns.core.exception.EndpointProtocolMismatchException
 import com.gilbertojrequena.memsns.core.exception.InvalidFilterPolicyException
+import com.gilbertojrequena.memsns.core.exception.InvalidQueueArnException
+import com.gilbertojrequena.memsns.core.filter_policy.PolicyFilterValidator
 import com.gilbertojrequena.memsns.server.MemSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 import java.lang.Integer.toHexString
@@ -34,13 +34,20 @@ internal class SubscriptionManager(snsOpActor: SendChannel<SnsOpsMessage>, priva
     }
 
     private fun validateEndpoint(subscription: Subscription) {
-        if (setOf(HTTP, HTTPS).contains(subscription.protocol) &&
-            !subscription.endpoint.startsWith("${subscription.protocol.value}://")
-        ) {
-            throw EndpointProtocolMismatchException(
-                subscription.endpoint,
-                subscription.protocol.value
-            )
+        when (subscription.protocol) {
+            HTTP, HTTPS -> {
+                if (!subscription.endpoint.startsWith("${subscription.protocol.value}://")) {
+                    throw EndpointProtocolMismatchException(
+                        subscription.endpoint,
+                        subscription.protocol.value
+                    )
+                }
+            }
+            SQS -> {
+                if (!subscription.endpoint.matches(Regex("arn:aws:sqs:[a-z0-9-]+:\\d+:[a-zA-Z0-9-_]+$"))) {
+                    throw InvalidQueueArnException(subscription.endpoint)
+                }
+            }
         }
     }
 

@@ -14,10 +14,6 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
-internal fun HttpStatusCode.isRetriable(): Boolean {
-    return this.value > 499
-}
-
 internal fun Routing.api(requestHandler: RequestHandler) {
     snsApi(requestHandler)
 }

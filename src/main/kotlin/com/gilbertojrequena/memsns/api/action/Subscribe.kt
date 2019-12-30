@@ -5,6 +5,7 @@ import com.gilbertojrequena.memsns.api.awsMetadata
 import com.gilbertojrequena.memsns.api.createTopicSubscriptionData
 import com.gilbertojrequena.memsns.api.exception.InvalidParameterException
 import com.gilbertojrequena.memsns.core.exception.EndpointProtocolMismatchException
+import com.gilbertojrequena.memsns.core.exception.InvalidQueueArnException
 import com.gilbertojrequena.memsns.core.manager.SubscriptionManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
@@ -21,6 +22,8 @@ internal class Subscribe(private val subscriptionManager: SubscriptionManager) :
             subscriptionManager.create(params.createTopicSubscriptionData())
         } catch (e: EndpointProtocolMismatchException) {
             throw InvalidParameterException("Endpoint", "Endpoint must match the specified protocol")
+        } catch (e: InvalidQueueArnException) {
+            throw InvalidParameterException("QueueArn", "SQS endpoint ARN")
         }
         log.info { "Subscription $subscription created" }
         call.respondText {

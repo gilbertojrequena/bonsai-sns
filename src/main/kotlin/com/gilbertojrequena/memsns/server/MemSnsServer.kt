@@ -119,6 +119,12 @@ class MemSnsServer(private val config: MemSnsConfig) {
             private set
         internal var memSnsEnvironment: MemSnsEnvironment? = null
             private set
+        internal var sqsEndpoint: String? = null
+            private set
+        internal var sqsAccessKey: String? = null
+            private set
+        internal var sqsSecretKey: String? = null
+            private set
 
         fun withPort(port: Int): Builder = apply { this.port = port }
         fun withAccountId(accountId: Long): Builder = apply { this.accountId = accountId }
@@ -126,8 +132,14 @@ class MemSnsServer(private val config: MemSnsConfig) {
         fun withMemSnsEnvironmentDefinition(memSnsEnvironment: MemSnsEnvironment): Builder =
             apply { this.memSnsEnvironment = memSnsEnvironment }
 
+        fun withSqsEndpoint(sqsEndpoint: String): Builder = apply { this.sqsEndpoint = sqsEndpoint }
+        fun withSqsAccessKey(sqsAccessKey: String): Builder = apply { this.sqsAccessKey = sqsAccessKey }
+        fun withSqsSecretKey(sqsSecretKey: String): Builder = apply { this.sqsSecretKey = sqsSecretKey }
+
         fun start(): MemSnsServer {
-            return MemSnsServer(MemSnsConfig(port, region, accountId, memSnsEnvironment)).start()
+            return MemSnsServer(
+                MemSnsConfig(port, region, accountId, memSnsEnvironment, sqsEndpoint, sqsAccessKey, sqsSecretKey)
+            ).start()
         }
     }
 }

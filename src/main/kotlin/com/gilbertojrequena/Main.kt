@@ -20,6 +20,9 @@ private fun configFromArgs(args: Array<String>): MemSnsConfig {
     return MemSnsConfig(
         port = argsMap["mem-sns.port"]?.toInt(),
         region = argsMap["mem-sns.region"],
-        accountId = argsMap["mem-sns.accountId"]?.toLong()
+        accountId = argsMap["mem-sns.accountId"]?.toLong(),
+        sqsEndpoint = argsMap["mem-sns.sqsEndpoint"],
+        sqsAccessKey = argsMap["mem-sns.sqsAccessKey"],
+        sqsSecretKey = argsMap["mem-sns.sqsSecretKey"]
     )
 }
