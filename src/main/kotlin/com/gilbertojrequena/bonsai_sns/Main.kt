@@ -18,11 +18,11 @@ private fun String.splitToPair(c: Char): Pair<String, String>? = this.indexOf(c)
 private fun configFromArgs(args: Array<String>): BonsaiSnsConfig {
     val argsMap = args.mapNotNull { it.splitToPair('=') }.toMap()
     return BonsaiSnsConfig(
-        port = argsMap["bonsai-sns.port"]?.toInt(),
-        region = argsMap["bonsai-sns.region"],
-        accountId = argsMap["bonsai-sns.accountId"]?.toLong(),
-        sqsEndpoint = argsMap["bonsai-sns.sqsEndpoint"],
-        sqsAccessKey = argsMap["bonsai-sns.sqsAccessKey"],
-        sqsSecretKey = argsMap["bonsai-sns.sqsSecretKey"]
+        port = argsMap["port"]?.toInt(),
+        region = argsMap["region"],
+        accountId = argsMap["accountId"]?.toLong(),
+        sqsEndpoint = argsMap["sqsEndpoint"],
+        sqsAccessKey = argsMap["sqsAccessKey"],
+        sqsSecretKey = argsMap["sqsSecretKey"]
     )
 }
