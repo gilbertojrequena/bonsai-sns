@@ -27,13 +27,13 @@ The rest of the operations return dummy responses when invoked.
 For starting an embedded server the `BonsaiSnsServerBuilder` can be used
 ```
 BonsaiSnsServer server = new BonsaiSnsServer.Builder()
-        .withAccountId(123L)
-        .withPort(9999)
-        .withRegion("someRegion")
-        .withSqsEndpoint("http://localhost:9324")
-        .withSqsAccessKey("foo")
-        .withSqsSecretKey("bar")
-        .start();
+    .withAccountId(123L)
+    .withPort(9999)
+    .withRegion("someRegion")
+    .withSqsEndpoint("http://localhost:9324")
+    .withSqsAccessKey("foo")
+    .withSqsSecretKey("bar")
+    .start();
 // Do something
 server.stop();
 ```
@@ -97,39 +97,39 @@ Environment configuration can also be done using the `BonsaiSnsServerBuilder` an
 
 ```
 BonsaiSnsServer server = new BonsaiSnsServer.Builder()
-        .withAccountId(123L)
-        .withPort(9999)
-        .withRegion("someRegion")
-        .withSqsEndpoint("http://localhost:9324")
-        .withSqsAccessKey("foo")
-        .withSqsSecretKey("bar")
-        .withBonsaiSnsEnvironmentDefinition(
-            BonsaiSnsEnvironment.Companion.definition()
-                .withTopic(
-                    Topic.Companion.definition()
-                        .withName("name")
-                        .withSubscription(
-                            Subscription.Companion.definition()
-                                .withEndpoint("http:/localhost:8080/endpoint")
-                                .withProtocol("http")
-                                .withAttribute("a", "b")
-                        )
-                )
-                .withTopic(
-                    Topic.Companion.definition()
-                        .withName("name")
-                        .withSubscription(
-                            Subscription.Companion.definition()
-                                .withEndpoint("arn:aws:sqs:blah:blah:blah")
-                                .withProtocol("sqs")
-                        )
-                        .withSubscription(
-                            Subscription.Companion.definition()
-                                .withEndpoint("http:/localhost:8080/endpoint")
-                                .withProtocol("http")
-                        )
-                )
-            ).start();
+    .withAccountId(123L)
+    .withPort(9999)
+    .withRegion("someRegion")
+    .withSqsEndpoint("http://localhost:9324")
+    .withSqsAccessKey("foo")
+    .withSqsSecretKey("bar")
+    .withBonsaiSnsEnvironmentDefinition(
+        BonsaiSnsEnvironment.Companion.definition()
+            .withTopic(
+                Topic.Companion.definition()
+                    .withName("name")
+                    .withSubscription(
+                        Subscription.Companion.definition()
+                            .withEndpoint("http:/localhost:8080/endpoint")
+                            .withProtocol("http")
+                            .withAttribute("a", "b")
+                    )
+            )
+            .withTopic(
+                Topic.Companion.definition()
+                    .withName("name")
+                    .withSubscription(
+                        Subscription.Companion.definition()
+                            .withEndpoint("arn:aws:sqs:blah:blah:blah")
+                            .withProtocol("sqs")
+                    )
+                    .withSubscription(
+                        Subscription.Companion.definition()
+                            .withEndpoint("http:/localhost:8080/endpoint")
+                            .withProtocol("http")
+                    )
+            )
+        ).start();
 
 // Do something
 server.stop();
@@ -168,17 +168,17 @@ BonsaiSnsServer server = new BonsaiSnsServer.Builder()
             )
     ).start();
 
-    AmazonSNS snsClient = AmazonSNSAsyncClientBuilder.standard()
-        .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("accessKey", "secretKey")))
-        .withEndpointConfiguration(
-            new AwsClientBuilder.EndpointConfiguration("http://localhost:7979", "region")
-        )
-    .build();
+AmazonSNS snsClient = AmazonSNSAsyncClientBuilder.standard()
+    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("accessKey", "secretKey")))
+    .withEndpointConfiguration(
+        new AwsClientBuilder.EndpointConfiguration("http://localhost:7979", "region")
+    )
+.build();
 
-    snsClient.listTopics().getTopics().forEach(topic ->
-            snsClient.publish(new PublishRequest(topic.getTopicArn(), "Package 1 was shipped")));
+snsClient.listTopics().getTopics().forEach(topic ->
+        snsClient.publish(new PublishRequest(topic.getTopicArn(), "Package 1 was shipped")));
 
-    server.stop();
+server.stop();
 ```
 
 
@@ -199,7 +199,7 @@ Go to the project directory and execute `gradlew test`
 Go to the project directory and execute `gradlew build`
 
 ## Contributing
-Pull requests are welcome 
+Pull requests and issues are welcome 
 
 ## Acknowledgments
 bonsai-sns can be used for anything but for replacing Amazon SNS in production environments
