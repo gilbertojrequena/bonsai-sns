@@ -44,8 +44,14 @@ Download the jar TODO and execute it
 
 `java -jar bonsai-sns-1.0.0.jar port=9494 region=region accountId=987654321 sqsEndpoint=http://localhost:9432 sqsAccessKey=foo sqsSecretKey=bar`
 
+or 
+
+`java -Dconfig.file=bonsai-sns.conf -jar bonsai-sns-1.0.0.jar`
+
 ### Environment configuration
-Topics and subscriptions can be created on startup by providing an `application.conf` or `reference.conf` file in the classpath
+bonsai-sns uses [Typesafe Config](https://github.com/lightbend/config) for loading its configuration, topics and subscriptions can be created on startup by providing an `application.conf` 
+or `reference.conf` file in the classpath or by providing the JVM option `config.file` with the location of the 
+configuration file 
 
 ```
 bonsai-sns {
@@ -145,7 +151,7 @@ file is used as fallback if there is no `.conf` file in the classpath, the defau
 ### Running stand-alone server
 
 When the jar is executed without params the `application.conf` or `reference.conf`
-file is used as fallback, if there is no `.conf` file in the classpath, the defaults are used
+file is used as fallback, if there is no `.conf` file in the classpath, the defaults are used 
 
 ### Default configuration values
 The default configuration values are `accountId=123456789`,`port=9797`, 
