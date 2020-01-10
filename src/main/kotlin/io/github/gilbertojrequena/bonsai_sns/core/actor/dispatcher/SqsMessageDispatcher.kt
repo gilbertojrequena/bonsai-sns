@@ -3,7 +3,7 @@ package io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.AmazonSQSException
 import com.amazonaws.services.sqs.model.SendMessageRequest
-import com.gilbertojrequena.bonsai_sns.core.exception.MessageDispatchException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.MessageDispatchException
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap

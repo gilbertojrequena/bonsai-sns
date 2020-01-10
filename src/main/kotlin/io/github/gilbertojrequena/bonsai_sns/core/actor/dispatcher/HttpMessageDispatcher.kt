@@ -1,7 +1,7 @@
 package io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher
 
-import com.gilbertojrequena.bonsai_sns.core.RetriableHttpClient
-import com.gilbertojrequena.bonsai_sns.core.exception.MessageDispatchException
+import io.github.gilbertojrequena.bonsai_sns.core.RetriableHttpClient
+import io.github.gilbertojrequena.bonsai_sns.core.exception.MessageDispatchException
 import mu.KotlinLogging
 
 internal class HttpMessageDispatcher(private val httpClient: RetriableHttpClient) : MessageDispatcher {

@@ -1,7 +1,7 @@
 package io.github.gilbertojrequena.bonsai_sns.core.filter_policy
 
-import com.gilbertojrequena.bonsai_sns.core.JsonMapper
-import com.gilbertojrequena.bonsai_sns.core.MessageAttribute
+import io.github.gilbertojrequena.bonsai_sns.core.JsonMapper
+import io.github.gilbertojrequena.bonsai_sns.core.MessageAttribute
 import mu.KotlinLogging
 
 internal class FilterPolicyEvaluator {

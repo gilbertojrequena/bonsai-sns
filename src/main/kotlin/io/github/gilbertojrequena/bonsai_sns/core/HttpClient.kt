@@ -1,6 +1,6 @@
 package io.github.gilbertojrequena.bonsai_sns.core
 
-import com.gilbertojrequena.bonsai_sns.core.exception.UnsuccessfulHttpCallException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.UnsuccessfulHttpCallException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.request.post

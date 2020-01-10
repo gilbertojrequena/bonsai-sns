@@ -1,9 +1,9 @@
 package io.github.gilbertojrequena.bonsai_sns.api.action
 
-import com.gilbertojrequena.bonsai_sns.api.ObjectMapper.writeXmlElement
-import com.gilbertojrequena.bonsai_sns.api.awsMetadata
-import com.gilbertojrequena.bonsai_sns.api.createPublishRequest
-import com.gilbertojrequena.bonsai_sns.core.manager.PublicationManager
+import io.github.gilbertojrequena.bonsai_sns.api.ObjectMapper.writeXmlElement
+import io.github.gilbertojrequena.bonsai_sns.api.awsMetadata
+import io.github.gilbertojrequena.bonsai_sns.api.createPublishRequest
+import io.github.gilbertojrequena.bonsai_sns.core.manager.PublicationManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 import io.ktor.response.respondText

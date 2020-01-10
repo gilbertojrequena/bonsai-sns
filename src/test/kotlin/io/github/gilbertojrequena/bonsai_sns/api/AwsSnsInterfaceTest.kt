@@ -12,7 +12,7 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.Message
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsServer
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsServer
 import io.ktor.application.call
 import io.ktor.request.receiveText
 import io.ktor.routing.post

@@ -1,11 +1,11 @@
 package io.github.gilbertojrequena.bonsai_sns.api.action
 
-import com.gilbertojrequena.bonsai_sns.api.action
-import com.gilbertojrequena.bonsai_sns.api.exception.ActionNotFoundException
-import com.gilbertojrequena.bonsai_sns.core.manager.PublicationManager
-import com.gilbertojrequena.bonsai_sns.core.manager.SubscriptionManager
-import com.gilbertojrequena.bonsai_sns.core.manager.TopicManager
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.api.action
+import io.github.gilbertojrequena.bonsai_sns.api.exception.ActionNotFoundException
+import io.github.gilbertojrequena.bonsai_sns.core.manager.PublicationManager
+import io.github.gilbertojrequena.bonsai_sns.core.manager.SubscriptionManager
+import io.github.gilbertojrequena.bonsai_sns.core.manager.TopicManager
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 import io.ktor.request.receive

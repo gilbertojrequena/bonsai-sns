@@ -1,7 +1,7 @@
 package io.github.gilbertojrequena.bonsai_sns.core.manager
 
-import com.gilbertojrequena.bonsai_sns.core.PublishRequest
-import com.gilbertojrequena.bonsai_sns.core.actor.message.PublishMessage
+import io.github.gilbertojrequena.bonsai_sns.core.PublishRequest
+import io.github.gilbertojrequena.bonsai_sns.core.actor.message.PublishMessage
 import kotlinx.coroutines.channels.SendChannel
 import java.util.*
 

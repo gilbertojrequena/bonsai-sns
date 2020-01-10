@@ -1,6 +1,6 @@
 package io.github.gilbertojrequena.bonsai_sns.core.exception
 
-import com.gilbertojrequena.bonsai_sns.core.Subscription
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription
 
 internal class SubscriptionAlreadyExist(
     subscription: Subscription

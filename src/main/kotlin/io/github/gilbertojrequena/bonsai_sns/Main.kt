@@ -1,7 +1,7 @@
 package io.github.gilbertojrequena.bonsai_sns
 
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsServer
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsServer
 
 fun main(args: Array<String>) {
     BonsaiSnsServer(configFromArgs(args))

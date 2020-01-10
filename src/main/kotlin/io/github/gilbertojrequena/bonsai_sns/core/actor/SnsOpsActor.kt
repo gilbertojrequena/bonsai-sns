@@ -1,9 +1,9 @@
 package io.github.gilbertojrequena.bonsai_sns.core.actor
 
-import com.gilbertojrequena.bonsai_sns.core.*
-import com.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
-import com.gilbertojrequena.bonsai_sns.core.exception.SubscriptionNotFoundException
-import com.gilbertojrequena.bonsai_sns.core.exception.TopicNotFoundException
+import io.github.gilbertojrequena.bonsai_sns.core.*
+import io.github.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
+import io.github.gilbertojrequena.bonsai_sns.core.exception.SubscriptionNotFoundException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.TopicNotFoundException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor

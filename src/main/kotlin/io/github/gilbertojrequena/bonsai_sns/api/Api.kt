@@ -1,8 +1,8 @@
 package io.github.gilbertojrequena.bonsai_sns.api
 
-import com.gilbertojrequena.bonsai_sns.api.action.RequestHandler
-import com.gilbertojrequena.bonsai_sns.api.exception.InvalidParameterException
-import com.gilbertojrequena.bonsai_sns.api.exception.MessageAttributeValidationException
+import io.github.gilbertojrequena.bonsai_sns.api.action.RequestHandler
+import io.github.gilbertojrequena.bonsai_sns.api.exception.InvalidParameterException
+import io.github.gilbertojrequena.bonsai_sns.api.exception.MessageAttributeValidationException
 import io.ktor.application.call
 import io.ktor.features.StatusPages
 import io.ktor.http.ContentType

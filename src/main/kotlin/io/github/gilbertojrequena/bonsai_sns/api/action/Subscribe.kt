@@ -1,12 +1,12 @@
 package io.github.gilbertojrequena.bonsai_sns.api.action
 
-import com.gilbertojrequena.bonsai_sns.api.ObjectMapper.writeXmlElement
-import com.gilbertojrequena.bonsai_sns.api.awsMetadata
-import com.gilbertojrequena.bonsai_sns.api.createTopicSubscriptionData
-import com.gilbertojrequena.bonsai_sns.api.exception.InvalidParameterException
-import com.gilbertojrequena.bonsai_sns.core.exception.EndpointProtocolMismatchException
-import com.gilbertojrequena.bonsai_sns.core.exception.InvalidQueueArnException
-import com.gilbertojrequena.bonsai_sns.core.manager.SubscriptionManager
+import io.github.gilbertojrequena.bonsai_sns.api.ObjectMapper.writeXmlElement
+import io.github.gilbertojrequena.bonsai_sns.api.awsMetadata
+import io.github.gilbertojrequena.bonsai_sns.api.createTopicSubscriptionData
+import io.github.gilbertojrequena.bonsai_sns.api.exception.InvalidParameterException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.EndpointProtocolMismatchException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidQueueArnException
+import io.github.gilbertojrequena.bonsai_sns.core.manager.SubscriptionManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 import io.ktor.response.respondText

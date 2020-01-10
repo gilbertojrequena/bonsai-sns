@@ -1,8 +1,8 @@
 package io.github.gilbertojrequena.bonsai_sns.core.filter_policy
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.gilbertojrequena.bonsai_sns.core.JsonMapper
-import com.gilbertojrequena.bonsai_sns.core.exception.InvalidFilterPolicyException
+import io.github.gilbertojrequena.bonsai_sns.core.JsonMapper
+import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidFilterPolicyException
 
 internal class PolicyFilterValidator {
     private val jsonMapper = JsonMapper.instance()

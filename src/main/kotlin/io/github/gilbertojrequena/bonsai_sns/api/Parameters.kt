@@ -1,10 +1,10 @@
 package io.github.gilbertojrequena.bonsai_sns.api
 
-import com.gilbertojrequena.bonsai_sns.api.exception.InvalidParameterException
-import com.gilbertojrequena.bonsai_sns.core.Message
-import com.gilbertojrequena.bonsai_sns.core.PublishRequest
-import com.gilbertojrequena.bonsai_sns.core.Subscription
-import com.gilbertojrequena.bonsai_sns.core.Topic
+import io.github.gilbertojrequena.bonsai_sns.api.exception.InvalidParameterException
+import io.github.gilbertojrequena.bonsai_sns.core.Message
+import io.github.gilbertojrequena.bonsai_sns.core.PublishRequest
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription
+import io.github.gilbertojrequena.bonsai_sns.core.Topic
 import io.ktor.http.Parameters
 
 internal fun Parameters.validateAndGet(parameter: String, reason: String = parameter): String {

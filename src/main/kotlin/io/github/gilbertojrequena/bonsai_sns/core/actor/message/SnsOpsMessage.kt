@@ -1,6 +1,6 @@
 package io.github.gilbertojrequena.bonsai_sns.core.actor.message
 
-import com.gilbertojrequena.bonsai_sns.core.*
+import io.github.gilbertojrequena.bonsai_sns.core.*
 import kotlinx.coroutines.channels.SendChannel
 
 internal sealed class SnsOpsMessage {

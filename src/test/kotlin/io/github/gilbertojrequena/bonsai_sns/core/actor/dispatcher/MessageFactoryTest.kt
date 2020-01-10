@@ -1,8 +1,8 @@
 package io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher
 
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
-import com.gilbertojrequena.bonsai_sns.core.Subscription
-import com.gilbertojrequena.bonsai_sns.core.SubscriptionWithAttributes
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription
+import io.github.gilbertojrequena.bonsai_sns.core.SubscriptionWithAttributes
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals

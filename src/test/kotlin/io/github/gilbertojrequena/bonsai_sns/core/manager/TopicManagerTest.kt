@@ -1,9 +1,9 @@
 package io.github.gilbertojrequena.bonsai_sns.core.manager
 
-import com.gilbertojrequena.bonsai_sns.core.Topic
-import com.gilbertojrequena.bonsai_sns.core.actor.snsOpsActor
-import com.gilbertojrequena.bonsai_sns.core.exception.TopicNotFoundException
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.core.Topic
+import io.github.gilbertojrequena.bonsai_sns.core.actor.snsOpsActor
+import io.github.gilbertojrequena.bonsai_sns.core.exception.TopicNotFoundException
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

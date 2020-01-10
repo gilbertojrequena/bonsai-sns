@@ -1,6 +1,6 @@
 package io.github.gilbertojrequena.bonsai_sns.core.filter_policy
 
-import com.gilbertojrequena.bonsai_sns.core.exception.InvalidFilterPolicyException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidFilterPolicyException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 

@@ -1,6 +1,6 @@
 package io.github.gilbertojrequena.bonsai_sns.server
 
-import com.gilbertojrequena.bonsai_sns.core.Attributes
+import io.github.gilbertojrequena.bonsai_sns.core.Attributes
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
 import com.typesafe.config.ConfigObject

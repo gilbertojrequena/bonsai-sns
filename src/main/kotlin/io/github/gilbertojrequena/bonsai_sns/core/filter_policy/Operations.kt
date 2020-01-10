@@ -1,9 +1,9 @@
 package io.github.gilbertojrequena.bonsai_sns.core.filter_policy
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.gilbertojrequena.bonsai_sns.core.MessageAttribute
-import com.gilbertojrequena.bonsai_sns.core.exception.InvalidAttributeTypeException
-import com.gilbertojrequena.bonsai_sns.core.exception.InvalidPolicyNumericOperationException
+import io.github.gilbertojrequena.bonsai_sns.core.MessageAttribute
+import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidAttributeTypeException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidPolicyNumericOperationException
 import java.math.BigDecimal
 
 internal val operationFactory = OperationFactory()

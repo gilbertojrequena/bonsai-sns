@@ -1,6 +1,6 @@
 package io.github.gilbertojrequena.bonsai_sns.core.manager
 
-import com.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
+import io.github.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 

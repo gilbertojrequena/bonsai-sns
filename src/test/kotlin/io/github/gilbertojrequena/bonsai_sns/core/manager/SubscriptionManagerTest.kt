@@ -1,15 +1,15 @@
 package io.github.gilbertojrequena.bonsai_sns.core.manager
 
-import com.gilbertojrequena.bonsai_sns.core.Subscription
-import com.gilbertojrequena.bonsai_sns.core.Subscription.Protocol.HTTP
-import com.gilbertojrequena.bonsai_sns.core.Subscription.Protocol.HTTPS
-import com.gilbertojrequena.bonsai_sns.core.Topic
-import com.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
-import com.gilbertojrequena.bonsai_sns.core.actor.snsOpsActor
-import com.gilbertojrequena.bonsai_sns.core.exception.EndpointProtocolMismatchException
-import com.gilbertojrequena.bonsai_sns.core.exception.SubscriptionNotFoundException
-import com.gilbertojrequena.bonsai_sns.core.exception.TopicNotFoundException
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription.Protocol.HTTP
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription.Protocol.HTTPS
+import io.github.gilbertojrequena.bonsai_sns.core.Topic
+import io.github.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
+import io.github.gilbertojrequena.bonsai_sns.core.actor.snsOpsActor
+import io.github.gilbertojrequena.bonsai_sns.core.exception.EndpointProtocolMismatchException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.SubscriptionNotFoundException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.TopicNotFoundException
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*

@@ -1,9 +1,9 @@
 package io.github.gilbertojrequena.bonsai_sns.api
 
-import com.gilbertojrequena.bonsai_sns.api.exception.MessageAttributeValidationException
-import com.gilbertojrequena.bonsai_sns.api.exception.MissingMessageAttributeDataTypeException
-import com.gilbertojrequena.bonsai_sns.api.exception.MissingMessageAttributeValueException
-import com.gilbertojrequena.bonsai_sns.core.MessageAttribute
+import io.github.gilbertojrequena.bonsai_sns.api.exception.MessageAttributeValidationException
+import io.github.gilbertojrequena.bonsai_sns.api.exception.MissingMessageAttributeDataTypeException
+import io.github.gilbertojrequena.bonsai_sns.api.exception.MissingMessageAttributeValueException
+import io.github.gilbertojrequena.bonsai_sns.core.MessageAttribute
 import io.ktor.http.Parameters
 
 internal class MessageAttributeParser {

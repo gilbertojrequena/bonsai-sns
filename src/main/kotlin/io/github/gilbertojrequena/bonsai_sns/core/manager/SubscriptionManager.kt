@@ -1,14 +1,14 @@
 package io.github.gilbertojrequena.bonsai_sns.core.manager
 
 import com.fasterxml.jackson.core.JsonParseException
-import com.gilbertojrequena.bonsai_sns.core.*
-import com.gilbertojrequena.bonsai_sns.core.Subscription.Protocol.*
-import com.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
-import com.gilbertojrequena.bonsai_sns.core.exception.EndpointProtocolMismatchException
-import com.gilbertojrequena.bonsai_sns.core.exception.InvalidQueueArnException
-import com.gilbertojrequena.bonsai_sns.core.exception.InvalidRedrivePolicyException
-import com.gilbertojrequena.bonsai_sns.core.filter_policy.PolicyFilterValidator
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.core.*
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription.Protocol.*
+import io.github.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
+import io.github.gilbertojrequena.bonsai_sns.core.exception.EndpointProtocolMismatchException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidQueueArnException
+import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidRedrivePolicyException
+import io.github.gilbertojrequena.bonsai_sns.core.filter_policy.PolicyFilterValidator
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 import java.lang.Integer.toHexString
 

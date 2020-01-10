@@ -1,8 +1,8 @@
 package io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher
 
-import com.gilbertojrequena.bonsai_sns.api.ObjectMapper
-import com.gilbertojrequena.bonsai_sns.core.SubscriptionWithAttributes
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.api.ObjectMapper
+import io.github.gilbertojrequena.bonsai_sns.core.SubscriptionWithAttributes
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import java.net.URLEncoder
 
 internal class MessageFactory(private val config: BonsaiSnsConfig) {

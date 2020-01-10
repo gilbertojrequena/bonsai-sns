@@ -1,11 +1,11 @@
 package io.github.gilbertojrequena.bonsai_sns.core.manager
 
-import com.gilbertojrequena.bonsai_sns.core.Token
-import com.gilbertojrequena.bonsai_sns.core.Topic
-import com.gilbertojrequena.bonsai_sns.core.TopicArn
-import com.gilbertojrequena.bonsai_sns.core.TopicsAndToken
-import com.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
-import com.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
+import io.github.gilbertojrequena.bonsai_sns.core.Token
+import io.github.gilbertojrequena.bonsai_sns.core.Topic
+import io.github.gilbertojrequena.bonsai_sns.core.TopicArn
+import io.github.gilbertojrequena.bonsai_sns.core.TopicsAndToken
+import io.github.gilbertojrequena.bonsai_sns.core.actor.message.SnsOpsMessage
+import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import kotlinx.coroutines.channels.SendChannel
 
 internal class TopicManager(snsOpActor: SendChannel<SnsOpsMessage>, private val config: BonsaiSnsConfig) :
