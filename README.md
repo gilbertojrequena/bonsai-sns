@@ -1,6 +1,6 @@
 # Bonsai SNS
 
-Is a simple async implementation of AWS SNS intended for execute tests or simulate environments locally, it was inspired by [ElasticMQ](https://github.com/softwaremill/elasticmq)
+Is a simple async implementation of AWS SNS intended for executing tests or simulate environments locally, it was inspired by [ElasticMQ](https://github.com/softwaremill/elasticmq)
 
 ## Features
 
