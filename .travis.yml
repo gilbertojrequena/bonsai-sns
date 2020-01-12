@@ -8,9 +8,6 @@ after_success:
   - export VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
   - export TAG="v$VERSION"
   - export LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-stages:
-  - name: deploy
-    if: branch = master
 deploy:
   provider: releases
   tag: $TAG
@@ -19,7 +16,7 @@ deploy:
   file: build/libs/*
   on:
     repo: gilbertojrequena/bonsai-sns
-    branch: release
+    branch: master
     condition: $VERSION != *"SNAPSHOT" && $LAST_TAG != $TAG
 env:
   global:
