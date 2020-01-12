@@ -8,9 +8,12 @@ after_success:
   - export VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
   - export TAG="v$VERSION"
   - export LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+before_deploy:
+  - git config --local user.name "Gilberto J Requena"
+  - git config --local user.email "gh.gilbertojrequena@fastmail.com"
+  - git tag $TAG
 deploy:
   provider: releases
-  tag: $TAG
   api_key:
     secure: 00fSG/+80EzWBlvm3rgLZCo5Yn78S5uPiG8srQ8BMytSBqyvQI03L2j4Jx+rVDpEoFkluvc+dESsTYzjpPiScxnLQ0PIk9vPgcsbmZYYG7UTP3DQlv6GQi+knKZi6oUhrITqyYQlCmjUgAIVhWIJ9T3wVcCMigEZcKsTgAodSRtj08oMg2YePmr7Z8QXYTNYlvDgqDjnPxHcevcoD4UZSWDq6X88twdPwjZGcm4uZ1h7cseglU9/WtZe8PDDhmQgyIif0NBJ4RWq5I1yLmJ+jl84hLuX8EHm/cNTlKc7nwTDsWy+V+1nBZXMlwIn05A7nA5H5HQCn/4AxBuF6HFvcP8UBkZePfxW++t4dGtx4c3P4S2eCjqVYIIfJQmcxQtK7W/2ZHZFPxtb5IaIyie9xX/zNn01UKrn1Y17rDBeRaduBw9P9D94WXUC0jSWNN51a1AoGlcwFqSYIBJ08tDxbJkSyGMPaUOF+/hjH+hZ/NH3iDNQ9GdjowdW5QPONN2+iWPAw/uGgfWKqiExyD1fMxm6L2Wmamkv7BiWSiVHZOcMWCiBUUfJ8WlVJs1oQ5l+jAAK7IA+RaUuPw4ume4VTgLRjFbGlktrO4Cfj8pbcrhdM6ogHVIYFKqpaTMs7XXHGXLbDKN3rZdV0cQU36TNCIpFIi7KEVv3MNNiA/jbEz8=
   file: build/libs/*
