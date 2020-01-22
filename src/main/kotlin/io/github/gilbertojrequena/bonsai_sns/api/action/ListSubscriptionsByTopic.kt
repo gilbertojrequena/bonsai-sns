@@ -1,13 +1,11 @@
 package io.github.gilbertojrequena.bonsai_sns.api.action
 
-import io.github.gilbertojrequena.bonsai_sns.api.ObjectMapper.writeXmlElement
-import io.github.gilbertojrequena.bonsai_sns.api.awsMetadata
 import io.github.gilbertojrequena.bonsai_sns.api.validateAndGet
+import io.github.gilbertojrequena.bonsai_sns.api.xml
 import io.github.gilbertojrequena.bonsai_sns.core.manager.SubscriptionManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 import io.ktor.response.respondText
-import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
 internal class ListSubscriptionsByTopic(private val subscriptionManager: SubscriptionManager) :
     Action {
@@ -16,37 +14,36 @@ internal class ListSubscriptionsByTopic(private val subscriptionManager: Subscri
             subscriptionManager.findAllByTopicArn(params.validateAndGet("TopicArn"), params["NextToken"])
 
         call.respondText {
-            writeXmlElement(jdom("ListSubscriptionsByTopicResponse") {
+            xml("ListSubscriptionsByTopicResponse") {
                 element("ListSubscriptionsByTopicResult") {
                     if (subscriptionsAndToken.nextToken != null) {
                         element("NextToken") {
-                            text(subscriptionsAndToken.nextToken)
+                            text = subscriptionsAndToken.nextToken
                         }
                     }
                     element("Subscriptions") {
                         for (subscription in subscriptionsAndToken.subscriptions) {
                             element("member") {
                                 element("TopicArn") {
-                                    text(subscription.topicArn)
+                                    text = subscription.topicArn
                                 }
                                 element("Protocol") {
-                                    text(subscription.protocol.name)
+                                    text = subscription.protocol.name
                                 }
                                 element("SubscriptionArn") {
-                                    text(subscription.arn)
+                                    text = subscription.arn
                                 }
                                 element("Owner") {
-                                    text(subscription.owner)
+                                    text = subscription.owner
                                 }
                                 element("Endpoint") {
-                                    text(subscription.endpoint)
+                                    text = subscription.endpoint
                                 }
                             }
                         }
                     }
                 }
-                awsMetadata()
-            })
+            }
         }
     }
 }

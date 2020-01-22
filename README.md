@@ -40,13 +40,13 @@ server.stop();
 
 ### Stand-alone server
 
-Download the [jar](https://repo1.maven.org/maven2/io/github/gilbertojrequena/bonsai-sns/0.1.2/bonsai-sns-0.1.2.jar) and execute it 
+Download the [jar](https://repo1.maven.org/maven2/io/github/gilbertojrequena/bonsai-sns/0.1.3/bonsai-sns-0.1.3.jar) and execute it 
 
-`java -jar bonsai-sns-0.1.2.jar port=9494 region=region accountId=987654321 sqsEndpoint=http://localhost:9432 sqsAccessKey=foo sqsSecretKey=bar`
+`java -jar bonsai-sns-0.1.3.jar port=9494 region=region accountId=987654321 sqsEndpoint=http://localhost:9432 sqsAccessKey=foo sqsSecretKey=bar`
 
 or 
 
-`java -Dconfig.file=bonsai-sns.conf -jar bonsai-sns-0.1.2.jar`
+`java -Dconfig.file=bonsai-sns.conf -jar bonsai-sns-0.1.3.jar`
 
 ### Environment configuration
 bonsai-sns uses [Typesafe Config](https://github.com/lightbend/config) for loading its configuration, topics and subscriptions can be created on startup by providing an `application.conf` 
@@ -198,7 +198,7 @@ server.stop();
 <dependency>
   <groupId>io.github.gilbertojrequena</groupId>
   <artifactId>bonsai-sns</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
 </dependency>
 ```
 

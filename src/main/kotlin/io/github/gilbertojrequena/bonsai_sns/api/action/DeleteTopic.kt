@@ -1,15 +1,13 @@
 package io.github.gilbertojrequena.bonsai_sns.api.action
 
-import io.github.gilbertojrequena.bonsai_sns.api.ObjectMapper
-import io.github.gilbertojrequena.bonsai_sns.api.awsMetadata
 import io.github.gilbertojrequena.bonsai_sns.api.validateAndGet
+import io.github.gilbertojrequena.bonsai_sns.api.xml
 import io.github.gilbertojrequena.bonsai_sns.core.exception.TopicNotFoundException
 import io.github.gilbertojrequena.bonsai_sns.core.manager.TopicManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 import io.ktor.response.respondText
 import mu.KotlinLogging
-import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
 internal class DeleteTopic(private val topicManager: TopicManager) : Action {
     private val log = KotlinLogging.logger {}
@@ -23,10 +21,7 @@ internal class DeleteTopic(private val topicManager: TopicManager) : Action {
         log.info { "Topic with arn: $arn deleted" }
 
         call.respondText {
-            ObjectMapper.writeXmlElement(
-                jdom("DeleteTopicResponse") {
-                    awsMetadata()
-                })
+            xml("DeleteTopicResponse")
         }
     }
 }

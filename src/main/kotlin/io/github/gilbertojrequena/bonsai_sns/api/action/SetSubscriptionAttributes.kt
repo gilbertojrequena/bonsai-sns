@@ -1,9 +1,8 @@
 package io.github.gilbertojrequena.bonsai_sns.api.action
 
-import io.github.gilbertojrequena.bonsai_sns.api.ObjectMapper
-import io.github.gilbertojrequena.bonsai_sns.api.awsMetadata
 import io.github.gilbertojrequena.bonsai_sns.api.exception.InvalidParameterException
 import io.github.gilbertojrequena.bonsai_sns.api.validateAndGet
+import io.github.gilbertojrequena.bonsai_sns.api.xml
 import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidFilterPolicyException
 import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidQueueArnException
 import io.github.gilbertojrequena.bonsai_sns.core.exception.InvalidRedrivePolicyException
@@ -11,7 +10,6 @@ import io.github.gilbertojrequena.bonsai_sns.core.manager.SubscriptionManager
 import io.ktor.application.ApplicationCall
 import io.ktor.http.Parameters
 import io.ktor.response.respondText
-import org.jonnyzzz.kotlin.xml.dsl.jdom.jdom
 
 internal class SetSubscriptionAttributes(private val subscriptionManager: SubscriptionManager) : Action {
     companion object {
@@ -39,10 +37,7 @@ internal class SetSubscriptionAttributes(private val subscriptionManager: Subscr
             throw InvalidParameterException("RedrivePolicy", e.message!!)
         }
         call.respondText {
-            ObjectMapper.writeXmlElement(
-                jdom("SetSubscriptionAttributesResponse") {
-                    awsMetadata()
-                })
+            xml("SetSubscriptionAttributesResponse")
         }
     }
 }
