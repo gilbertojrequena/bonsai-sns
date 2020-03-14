@@ -20,7 +20,7 @@ private fun configFromArgs(args: Array<String>): BonsaiSnsConfig {
     return BonsaiSnsConfig(
         port = argsMap["port"]?.toInt(),
         region = argsMap["region"],
-        accountId = argsMap["accountId"]?.toLong(),
+        accountId = argsMap["accountId"],
         sqsEndpoint = argsMap["sqsEndpoint"],
         sqsAccessKey = argsMap["sqsAccessKey"],
         sqsSecretKey = argsMap["sqsSecretKey"]

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.assertThrows
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class SubscriptionManagerTest {
-    private val config = BonsaiSnsConfig(1234, "region", 123456789)
+    private val config = BonsaiSnsConfig(1234, "region", "123456789")
     private val snsOpActor = snsOpsActor()
     private val subscriptionManager = SubscriptionManager(snsOpActor, config)
 

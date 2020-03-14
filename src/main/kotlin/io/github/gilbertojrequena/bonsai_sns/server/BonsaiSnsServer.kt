@@ -113,7 +113,7 @@ class BonsaiSnsServer(private val config: BonsaiSnsConfig) {
     class Builder {
         internal var port: Int? = null
             private set
-        internal var accountId: Long? = null
+        internal var accountId: String? = null
             private set
         internal var region: String? = null
             private set
@@ -127,7 +127,7 @@ class BonsaiSnsServer(private val config: BonsaiSnsConfig) {
             private set
 
         fun withPort(port: Int): Builder = apply { this.port = port }
-        fun withAccountId(accountId: Long): Builder = apply { this.accountId = accountId }
+        fun withAccountId(accountId: String): Builder = apply { this.accountId = accountId }
         fun withRegion(region: String): Builder = apply { this.region = region }
         fun withBonsaiSnsEnvironmentDefinition(bonsaiSnsEnvironment: BonsaiSnsEnvironment): Builder =
             apply { this.bonsaiSnsEnvironment = bonsaiSnsEnvironment }

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.assertThrows
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class TopicManagerTest {
-    private val config = BonsaiSnsConfig(1234, "region", 123456789)
+    private val config = BonsaiSnsConfig(1234, "region", "123456789")
     private val topicManager = TopicManager(snsOpsActor(), config)
 
     @Test

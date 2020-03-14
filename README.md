@@ -27,7 +27,7 @@ The rest of the operations return dummy responses when invoked.
 For starting an embedded server the `BonsaiSnsServerBuilder` can be used
 ```
 BonsaiSnsServer server = new BonsaiSnsServer.Builder()
-    .withAccountId(123L)
+    .withAccountId("123")
     .withPort(9999)
     .withRegion("someRegion")
     .withSqsEndpoint("http://localhost:9324")
@@ -40,13 +40,13 @@ server.stop();
 
 ### Stand-alone server
 
-Download the [jar](https://repo1.maven.org/maven2/io/github/gilbertojrequena/bonsai-sns/0.1.6/bonsai-sns-0.1.6.jar) and execute it 
+Download the [jar](https://repo1.maven.org/maven2/io/github/gilbertojrequena/bonsai-sns/0.1.7/bonsai-sns-0.1.7.jar) and execute it 
 
-`java -jar bonsai-sns-0.1.6.jar port=9494 region=region accountId=987654321 sqsEndpoint=http://localhost:9432 sqsAccessKey=foo sqsSecretKey=bar`
+`java -jar bonsai-sns-0.1.7.jar port=9494 region=region accountId=987654321 sqsEndpoint=http://localhost:9432 sqsAccessKey=foo sqsSecretKey=bar`
 
 or 
 
-`java -Dconfig.file=bonsai-sns.conf -jar bonsai-sns-0.1.6.jar`
+`java -Dconfig.file=bonsai-sns.conf -jar bonsai-sns-0.1.7.jar`
 
 ### Environment configuration
 bonsai-sns uses [Typesafe Config](https://github.com/lightbend/config) for loading its configuration, topics and subscriptions can be created on startup by providing an `application.conf` 
@@ -57,7 +57,7 @@ configuration file
 bonsai-sns {
   port = 7979
   region = "region"
-  accountId = 123456789
+  accountId = "123456789"
   sqsEndpoint = "http://localhost:9324"
   sqsAccessKey = "foo"
   sqsSecretKey = "bar"
@@ -103,7 +103,7 @@ Environment configuration can also be done using the `BonsaiSnsServerBuilder` an
 
 ```
 BonsaiSnsServer server = new BonsaiSnsServer.Builder()
-    .withAccountId(123L)
+    .withAccountId("123")
     .withPort(9999)
     .withRegion("someRegion")
     .withSqsEndpoint("http://localhost:9324")
@@ -198,7 +198,7 @@ server.stop();
 <dependency>
   <groupId>io.github.gilbertojrequena</groupId>
   <artifactId>bonsai-sns</artifactId>
-  <version>0.1.6</version>
+  <version>0.1.7</version>
 </dependency>
 ```
 

@@ -7,7 +7,7 @@ import com.typesafe.config.ConfigFactory
 public class BonsaiSnsConfig(
     internal var port: Int? = null,
     internal var region: String? = null,
-    internal var accountId: Long? = null,
+    internal var accountId: String? = null,
     internal var bonsaiSnsEnvironment: BonsaiSnsEnvironment? = null,
     internal var sqsEndpoint: String? = null,
     internal var sqsAccessKey: String? = null,
@@ -16,7 +16,7 @@ public class BonsaiSnsConfig(
     companion object {
         private const val DEFAULT_PORT = 7979
         private const val DEFAULT_REGION = "region"
-        private const val DEFAULT_ACCOUNT_ID = 123456789L
+        private const val DEFAULT_ACCOUNT_ID = "123456789"
     }
 
     init {
@@ -37,7 +37,7 @@ public class BonsaiSnsConfig(
         }
         if (accountId == null) {
             accountId = getOrDefault(bonsaiSnsConfig, DEFAULT_ACCOUNT_ID) {
-                it.getLong("accountId")
+                it.getString("accountId")
             }
         }
         if (sqsEndpoint.isNullOrBlank()) {

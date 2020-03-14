@@ -50,7 +50,7 @@ internal class AwsSnsInterfaceTest {
         private val basicAWSCredentials = BasicAWSCredentials("foo", "bar")
         private const val region = "region"
         private const val port = 7979
-        private const val accountId = 123456789L
+        private const val accountId = "123456789"
 
         @JvmStatic
         @BeforeAll

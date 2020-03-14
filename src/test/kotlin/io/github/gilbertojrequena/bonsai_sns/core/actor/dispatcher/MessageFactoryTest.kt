@@ -12,7 +12,7 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class MessageFactoryTest {
-    private val config = BonsaiSnsConfig(1234, "region", 123456789)
+    private val config = BonsaiSnsConfig(1234, "region", "123456789")
     private val subscription = mockk<Subscription>()
     private lateinit var messageFactory: MessageFactory
 
