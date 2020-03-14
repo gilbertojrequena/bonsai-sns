@@ -22,8 +22,8 @@ deploy:
     branch: master
     condition: $VERSION != *"SNAPSHOT" && $LAST_TAG != $TAG
 after_deploy:
-  - docker build -t $DOCKER_HUB_USERNAME/bonsai-sns:$VERSION --build-arg BONSAI_SNS_VERSION=$VERSION ./docker
-  - docker push $DOCKER_HUB_USERNAME/bonsai-sns:$VERSION
+  - docker build -t $DOCKER_HUB_USERNAME/bonsai-sns:0.1.4 --build-arg BONSAI_SNS_VERSION=0.1.4 ./docker
+  - docker push $DOCKER_HUB_USERNAME/bonsai-sns:0.1.4
 env:
   global:
     - secure: k/ZCzD31lLDmFV8zQJtASULdqXJin2S8MoUAUzKzutNmM+VD4p26Ttx9ExIO4kBjXfZLSTffEKE2MmAfJFCvYqrJNGgfaBGB5s8jnwtKpPvUY1xw3C8HfkLqJECSrKnvAgxrYYIWHVO+3jhkokqPyvuzjGJoFQwp5OhYpKOpFD6rSAC5hTU0KBwePTg2odSbtf0hj9AsbwgT0rYVKnjpfkvITcVP5JXeKN1fk2nf6e5ljT5JeaHJz7pv4ie7D6zglAqKUL8JKZOJV+PKFWJSVNzPeNuI1FWqZo9MH4UzKwoeqEAwnX0WV4j798q9b1wg4nfQ5z8tFsX610dY4X1MyRnqhUR/Jf5N9JANMtDJXc29CJn7p9sD4dKbu1bbYURkeYx0nD7EPyPxCgwp7pX1G7YlGu1a2Xl/uwHqdUJDhObH5ORw48fEhDqGVVtHl/rMxP0hqziNQpFy0NBxZbJG5AkB2C0XYWwppy5FxItQqOo7Npnbdsr0DZkUOlJNsxHwcMZNhsdSOyI0srsV4Vj1oET9LTQTqpFB0/IvNEX5KqMGEaKfQCH+N6sJ6A030T/0mkymR8RrwMg8+GtCKdo9MyhE0YAhUMxAwTQbR7PpCC9uw/UE9iLkLpV88l5TuCixmky4pwZVd3wmiMZt8LqVXNTDqiGZHurdEsJ74RQFPJU=
