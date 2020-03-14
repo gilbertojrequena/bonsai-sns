@@ -8,6 +8,7 @@ after_success:
   - export VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
   - export TAG="v$VERSION"
   - export LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+  - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
   - docker build -t $DOCKER_HUB_USERNAME/bonsai-sns:0.1.4 --build-arg BONSAI_SNS_VERSION=0.1.4 ./docker
   - docker push $DOCKER_HUB_USERNAME/bonsai-sns:0.1.4
 before_deploy:
