@@ -9,8 +9,8 @@ after_success:
   - export TAG="v$VERSION"
   - export LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
   - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
-  - docker build -t $DOCKER_HUB_USERNAME/bonsai-sns:0.1.4 --build-arg BONSAI_SNS_VERSION=0.1.4 ./docker
-  - docker push $DOCKER_HUB_USERNAME/bonsai-sns:0.1.4
+  - docker build -t $DOCKER_HUB_USERNAME/bonsai-sns:0.1.7 --build-arg BONSAI_SNS_VERSION=0.1.7 ./docker
+  - docker push $DOCKER_HUB_USERNAME/bonsai-sns:0.1.7
 before_deploy:
   - git config --local user.name "Gilberto J Requena"
   - git config --local user.email "gh.gilbertojrequena@fastmail.com"
