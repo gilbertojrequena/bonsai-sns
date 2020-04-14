@@ -190,7 +190,17 @@ server.stop();
 
 ## Bonsai-sns docker image
 
-*TODO*
+Docker image [gilbertojrequena/bonsai-sns](https://hub.docker.com/r/gilbertojrequena/bonsai-sns) is available
+
+```
+docker run -p 7979 gilbertojrequena/bonsai-sns
+```
+
+Custom configuration and `logback.xml` can be provided
+
+```
+docker run -p 7979 -v custom.conf:/opt/bonsai-sns/bonsai-sns.conf -v logback.xml:/opt/bonsai-sns/logback.xml
+```
 
 ## Bonsai-sns in maven 
 
