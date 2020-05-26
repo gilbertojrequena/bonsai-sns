@@ -4,11 +4,11 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
-import io.github.gilbertojrequena.bonsai_sns.core.*
-import io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher.HttpMessageDispatcher
-import io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher.MessageDispatcher
-import io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher.MessageFactory
-import io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher.SqsMessageDispatcher
+import io.github.gilbertojrequena.bonsai_sns.core.JsonMapper
+import io.github.gilbertojrequena.bonsai_sns.core.PublishRequest
+import io.github.gilbertojrequena.bonsai_sns.core.RetriableHttpClient
+import io.github.gilbertojrequena.bonsai_sns.core.Subscription
+import io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher.*
 import io.github.gilbertojrequena.bonsai_sns.core.actor.message.PublishMessage
 import io.github.gilbertojrequena.bonsai_sns.core.exception.MessageDispatchException
 import io.github.gilbertojrequena.bonsai_sns.core.exception.MessageDispatcherNotFoundException
@@ -24,7 +24,7 @@ import mu.KotlinLogging
 
 internal fun publishActor(subscriptionManager: SubscriptionManager, config: BonsaiSnsConfig) =
     GlobalScope.actor<PublishMessage> {
-        with(MessageDispatchManager(subscriptionManager, MessageFactory(config), RetriableHttpClient(), config)) {
+        with(MessageDispatchManager(subscriptionManager, RetriableHttpClient(), config)) {
             for (message in channel) {
                 when (message) {
                     is PublishMessage.Publish -> dispatchMessages(message.publishRequest)
@@ -35,7 +35,6 @@ internal fun publishActor(subscriptionManager: SubscriptionManager, config: Bons
 
 private class MessageDispatchManager(
     private val subscriptionManager: SubscriptionManager,
-    private val messageFactory: MessageFactory,
     httpClient: RetriableHttpClient,
     config: BonsaiSnsConfig
 ) {
@@ -56,8 +55,9 @@ private class MessageDispatchManager(
                 .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(config.sqsEndpoint, config.region))
                 .build()
         } else null
-        httpMessageDispatcher = HttpMessageDispatcher(httpClient)
-        sqsMessageDispatcher = SqsMessageDispatcher(sqsClient)
+        val messageBodyFactory = MessageBodyFactory(config)
+        httpMessageDispatcher = HttpMessageDispatcher(httpClient, messageBodyFactory)
+        sqsMessageDispatcher = SqsMessageDispatcher(sqsClient, messageBodyFactory)
 
         dispatcherByProtocol = mapOf(
             Subscription.Protocol.HTTP to httpMessageDispatcher,
@@ -78,13 +78,13 @@ private class MessageDispatchManager(
                         )
                     val subscriptionPolicy = attributes["FilterPolicy"]
                     if (subscriptionPolicy.isNullOrBlank() || messageIsAccepted(publishRequest, subscriptionPolicy)) {
-                        val message = messageFactory.create(
-                            publishRequest.message.body,
-                            SubscriptionWithAttributes(subscription, attributes),
-                            publishRequest.messageId
+                        val dispatchMessageRequest = DispatchMessageRequest(
+                            subscription.endpoint, publishRequest.topicArn,
+                            publishRequest.message, publishRequest.messageId, subscription.arn,
+                            attributes["RawMessageDelivery"] == "true"
                         )
                         try {
-                            messageDispatcher.dispatch(subscription.endpoint, message)
+                            messageDispatcher.dispatch(dispatchMessageRequest)
                         } catch (e: MessageDispatchException) {
                             val redrivePolicy = attributes["RedrivePolicy"]
                             if (!redrivePolicy.isNullOrBlank()) {
@@ -93,20 +93,27 @@ private class MessageDispatchManager(
                                 try {
                                     log.debug {
                                         "Sending message to dead letter queue, endpoint: '${subscription.endpoint}', " +
-                                                "message: '$message', dlq arn: '$dlqArn'"
+                                                "message: '${publishRequest.message}', dlq arn: '$dlqArn'"
                                     }
-                                    sqsMessageDispatcher.dispatch(dlqArn, message)
+                                    sqsMessageDispatcher.dispatch(
+                                        DispatchMessageRequest(
+                                            dlqArn, dispatchMessageRequest.topicArn,
+                                            dispatchMessageRequest.message, dispatchMessageRequest.messageId,
+                                            dispatchMessageRequest.subscriptionArn,
+                                            attributes["RawMessageDelivery"] == "true"
+                                        )
+                                    )
                                 } catch (e: MessageDispatchException) {
                                     log.debug {
                                         "Message could not be delivered to dead letter queue, " +
-                                                "endpoint: '${subscription.endpoint}', message: '$message'" +
+                                                "endpoint: '${subscription.endpoint}', message: '${publishRequest.message}'" +
                                                 ", dlq arn: '$dlqArn'"
                                     }
                                 }
                             } else {
                                 log.debug {
                                     "Message will be lost, there is no dlq configured for subscription, " +
-                                            "endpoint: ${subscription.endpoint}, message: '$message', subscription: $subscription"
+                                            "endpoint: ${subscription.endpoint}, message: '${publishRequest.message}', subscription: $subscription"
                                 }
                             }
                         }

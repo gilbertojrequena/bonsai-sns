@@ -1,25 +1,20 @@
 package io.github.gilbertojrequena.bonsai_sns.core.actor.dispatcher
 
 import io.github.gilbertojrequena.bonsai_sns.api.ObjectMapper
-import io.github.gilbertojrequena.bonsai_sns.core.SubscriptionWithAttributes
 import io.github.gilbertojrequena.bonsai_sns.server.BonsaiSnsConfig
 import java.net.URLEncoder
 
-internal class MessageFactory(private val config: BonsaiSnsConfig) {
+internal class MessageBodyFactory(private val config: BonsaiSnsConfig) {
 
-    fun create(
-        text: String,
-        subscriptionWithAttributes: SubscriptionWithAttributes,
-        messageId: String
-    ): String {
-        return if (subscriptionWithAttributes.attributes["RawMessageDelivery"] == "true") {
-            text
+    fun create(dispatchMessageRequest: DispatchMessageRequest): String {
+        return if (dispatchMessageRequest.isRaw) {
+            dispatchMessageRequest.message.body
         } else {
-            ObjectMapper.json {
-                it.put("Type", "Notification")
-                    .put("MessageId", messageId)
-                    .put("TopicArn", subscriptionWithAttributes.subscription.topicArn)
-                    .put("Message", text)
+            ObjectMapper.json { jsonObject ->
+                val attributes = jsonObject.put("Type", "Notification")
+                    .put("MessageId", dispatchMessageRequest.messageId)
+                    .put("TopicArn", dispatchMessageRequest.topicArn)
+                    .put("Message", dispatchMessageRequest.message.body)
                     .put("SignatureVersion", "1")
                     .put(
                         "Signature",
@@ -31,8 +26,16 @@ internal class MessageFactory(private val config: BonsaiSnsConfig) {
                     )
                     .put(
                         "UnsubscribeURL",
-                        encode("http://localhost:${config.port}/?Action=Unsubscribe&SubscriptionArn=${subscriptionWithAttributes.subscription.arn}")
+                        encode("http://localhost:${config.port}/?Action=Unsubscribe&SubscriptionArn=${dispatchMessageRequest.subscriptionArn}")
                     )
+                    .putObject("MessageAttributes")
+
+                for (attribute in dispatchMessageRequest.message.attributes) {
+                    attributes.putObject(attribute.key)
+                        .put("Type", attribute.value.type)
+                        .put("Value", attribute.value.value)
+                }
+                jsonObject
             }
         }
     }

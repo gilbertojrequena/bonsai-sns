@@ -205,7 +205,21 @@ internal class AwsSnsInterfaceTest {
             )
         )
         val message = httpMessagesChannel.receive()
-        assertTrue(message.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https%3A%2F%2Flocalhost%3A$port%2FSimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http%3A%2F%2Flocalhost%3A$port%2F%3FAction%3DUnsubscribe%26SubscriptionArn%3Darn%3Aaws%3Asns%3A$region%3A$accountId%3Atest-topic%3A[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\"}")))
+        assertTrue(message.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https%3A%2F%2Flocalhost%3A$port%2FSimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http%3A%2F%2Flocalhost%3A$port%2F%3FAction%3DUnsubscribe%26SubscriptionArn%3Darn%3Aaws%3Asns%3A$region%3A$accountId%3Atest-topic%3A[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\",\"MessageAttributes\":\\{}}")))
+    }
+
+    @Test
+    fun `should publish http message with attributes`() = runBlocking {
+        snsClient.subscribe(testTopicArn, "http", "http://localhost:7777/target")
+        snsClient.publish(
+            PublishRequest(
+                testTopicArn, "message"
+            ).withMessageAttributes(
+                mapOf("key" to MessageAttributeValue().withDataType("String").withStringValue("value"))
+            )
+        )
+        val message = httpMessagesChannel.receive()
+        assertTrue(message.matches(Regex("\\{\"Type\":\"Notification\",\"MessageId\":\"[a-zA-Z0-9-]*\",\"TopicArn\":\"arn:aws:sns:$region:$accountId:test-topic\",\"Message\":\"message\",\"SignatureVersion\":\"1\",\"Signature\":\"[a-zA-Z0-9 /+-=]*\",\"SigningCertURL\":\"https%3A%2F%2Flocalhost%3A$port%2FSimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem\",\"UnsubscribeURL\":\"http%3A%2F%2Flocalhost%3A$port%2F%3FAction%3DUnsubscribe%26SubscriptionArn%3Darn%3Aaws%3Asns%3A$region%3A$accountId%3Atest-topic%3A[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*\",\"MessageAttributes\":\\{\"key\":\\{\"Type\":\"String\",\"Value\":\"value\"}}}")))
     }
 
     @Test
@@ -305,17 +319,21 @@ internal class AwsSnsInterfaceTest {
     }
 
     @Test
-    fun `should publish raw message to sqs`() {
+    fun `should publish raw message with attributes to sqs`() {
         val subscriptionResult = snsClient.subscribe(testTopicArn, "sqs", testQueueArn)
         snsClient.setSubscriptionAttributes(subscriptionResult.subscriptionArn, "RawMessageDelivery", "true")
         snsClient.publish(
             PublishRequest(
                 testTopicArn, "message"
+            ).withMessageAttributes(
+                mapOf("key" to MessageAttributeValue().withDataType("String").withStringValue("value"))
             )
         )
 
-        val message = getMessageFromQueue(testQueueUrl)
+        val message = getMessageFromQueue(testQueueUrl, listOf("key"))
         assertEquals("message", message.body)
+        assertEquals(message.messageAttributes["key"]!!.dataType, "String")
+        assertEquals(message.messageAttributes["key"]!!.stringValue, "value")
     }
 
     @Test
@@ -518,11 +536,12 @@ internal class AwsSnsInterfaceTest {
         )
     }
 
-    private fun getMessageFromQueue(queueUrl: String): Message {
+    private fun getMessageFromQueue(queueUrl: String, attributeNames: List<String> = listOf()): Message {
         return sqsClient.receiveMessage(
             ReceiveMessageRequest(queueUrl)
                 .withWaitTimeSeconds(2)
                 .withMaxNumberOfMessages(1)
+                .withMessageAttributeNames(attributeNames)
         ).messages[0]
     }
 }
